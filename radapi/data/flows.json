@@ -25,21 +25,21 @@
                 "y": 183,
                 "wires": [
                     {
-                        "id": "819897ce.7c8408"
-                    },
-                    {
                         "id": "4f674346.4d688c"
                     },
                     {
                         "id": "4268bdaf.5d4124"
+                    },
+                    {
+                        "id": "819897ce.7c8408"
                     }
                 ]
             }
         ],
         "out": [
             {
-                "x": 442,
-                "y": 173,
+                "x": 369,
+                "y": 60,
                 "wires": [
                     {
                         "id": "d24aa65d.caeb68",
@@ -389,7 +389,7 @@
         "fieldType": "msg",
         "format": "handlebars",
         "syntax": "mustache",
-        "template": "source ./prog.cfg\ntransport select swd\nset WORKAREASIZE 0\n \nset CHIPNAME nrf51822\nsource [find target/nrf51.cfg]\n \nreset_config  srst_nogate\n \nadapter_nsrst_delay 100\nadapter_nsrst_assert_width 100\n \ninit\nhalt\nnrf51 mass_erase\nsleep 500\nflash write_image ./firmware.hex\nsleep 30000\nverify_image ./firmware.hex\nreset\nshutdown\n",
+        "template": "source prog.cfg\ntransport select swd\nset WORKAREASIZE 0\n \nset CHIPNAME nrf51822\nsource [find target/nrf51.cfg]\n \nreset_config  srst_nogate\n \nadapter_nsrst_delay 100\nadapter_nsrst_assert_width 100\n \ninit\nhalt\nnrf51 mass_erase\nflash write_image firmware.hex\nverify_image firmware.hex\nreset\nshutdown\n",
         "x": 263.5,
         "y": 232.5,
         "wires": [

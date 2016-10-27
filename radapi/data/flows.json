@@ -7,7 +7,7 @@
     {
         "id": "2aca2241.addfbe",
         "type": "tab",
-        "label": "Power"
+        "label": "Ops"
     },
     {
         "id": "3b57119.fef17ee",
@@ -73,7 +73,7 @@
         "z": "",
         "summary": "Shutdown",
         "description": "",
-        "tags": "Power",
+        "tags": "Ops",
         "consumes": "",
         "produces": "",
         "parameters": [],
@@ -117,7 +117,24 @@
         "z": "",
         "summary": "Reboot",
         "description": "",
-        "tags": "Power",
+        "tags": "Ops",
+        "consumes": "",
+        "produces": "",
+        "parameters": [],
+        "responses": {
+            "200": {
+                "description": "OK"
+            }
+        },
+        "deprecated": false
+    },
+    {
+        "id": "6cedbd68.79cc24",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "Upgrade running software",
+        "description": "",
+        "tags": "Ops",
         "consumes": "",
         "produces": "",
         "parameters": [],
@@ -188,8 +205,8 @@
         "type": "http response",
         "z": "2aca2241.addfbe",
         "name": "OK",
-        "x": 369.5,
-        "y": 126,
+        "x": 370.5,
+        "y": 216,
         "wires": []
     },
     {
@@ -202,12 +219,19 @@
         "useSpawn": "",
         "timer": "",
         "name": "",
-        "x": 398.5,
-        "y": 77.5,
+        "x": 364.5,
+        "y": 38.5,
         "wires": [
-            [],
-            [],
-            []
+            [
+                "dc83b440.ca6d48",
+                "b43f7523.6fe2c8"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ]
         ]
     },
     {
@@ -219,11 +243,10 @@
         "method": "post",
         "swaggerDoc": "b333b199.a9108",
         "x": 138.5,
-        "y": 78,
+        "y": 38,
         "wires": [
             [
-                "cad6dd3c.aa16f",
-                "dc83b440.ca6d48"
+                "cad6dd3c.aa16f"
             ]
         ]
     },
@@ -290,12 +313,11 @@
         "url": "/reboot",
         "method": "post",
         "swaggerDoc": "deec8ee8.3329c",
-        "x": 130.5,
-        "y": 175,
+        "x": 128.5,
+        "y": 98,
         "wires": [
             [
-                "ea59505a.21171",
-                "dc83b440.ca6d48"
+                "ea59505a.21171"
             ]
         ]
     },
@@ -309,12 +331,19 @@
         "useSpawn": "",
         "timer": "",
         "name": "",
-        "x": 389.5,
-        "y": 174.5,
+        "x": 354.5,
+        "y": 97.5,
         "wires": [
-            [],
-            [],
-            []
+            [
+                "b43f7523.6fe2c8",
+                "dc83b440.ca6d48"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ]
         ]
     },
     {
@@ -376,8 +405,8 @@
         "appendNewline": false,
         "createDir": true,
         "overwriteFile": "true",
-        "x": 435.5,
-        "y": 224.5,
+        "x": 463.5,
+        "y": 225.5,
         "wires": []
     },
     {
@@ -461,5 +490,58 @@
                 "581bdf71.f45c1"
             ]
         ]
+    },
+    {
+        "id": "97eb08ab.2161d8",
+        "type": "http in",
+        "z": "2aca2241.addfbe",
+        "name": "",
+        "url": "/upgrade",
+        "method": "post",
+        "swaggerDoc": "6cedbd68.79cc24",
+        "x": 129.5,
+        "y": 157,
+        "wires": [
+            [
+                "491435e4.7dcedc"
+            ]
+        ]
+    },
+    {
+        "id": "491435e4.7dcedc",
+        "type": "exec",
+        "z": "2aca2241.addfbe",
+        "command": "sudo apt-get update && sudo apt-get dist-upgrade",
+        "addpay": false,
+        "append": "",
+        "useSpawn": false,
+        "timer": "",
+        "name": "upgrade",
+        "x": 345.5,
+        "y": 156.5,
+        "wires": [
+            [
+                "dc83b440.ca6d48",
+                "b43f7523.6fe2c8"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ]
+        ]
+    },
+    {
+        "id": "b43f7523.6fe2c8",
+        "type": "debug",
+        "z": "2aca2241.addfbe",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 389.5,
+        "y": 265,
+        "wires": []
     }
 ]

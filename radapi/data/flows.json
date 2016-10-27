@@ -1,0 +1,465 @@
+[
+    {
+        "id": "a39a4057.2994",
+        "type": "tab",
+        "label": "GPIO"
+    },
+    {
+        "id": "2aca2241.addfbe",
+        "type": "tab",
+        "label": "Power"
+    },
+    {
+        "id": "3b57119.fef17ee",
+        "type": "tab",
+        "label": "nRF51"
+    },
+    {
+        "id": "b6cd8abc.bda2e8",
+        "type": "subflow",
+        "name": "nRF Prog",
+        "info": "",
+        "in": [
+            {
+                "x": 43,
+                "y": 183,
+                "wires": [
+                    {
+                        "id": "819897ce.7c8408"
+                    },
+                    {
+                        "id": "4f674346.4d688c"
+                    },
+                    {
+                        "id": "4268bdaf.5d4124"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 442,
+                "y": 173,
+                "wires": [
+                    {
+                        "id": "d24aa65d.caeb68",
+                        "port": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "147f5c0a.48f124",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "Toggle GPIO 26 (pin 37)",
+        "description": "",
+        "tags": "GPIO",
+        "consumes": "",
+        "produces": "",
+        "parameters": [],
+        "responses": {
+            "200": {
+                "description": "OK",
+                "code": "200"
+            }
+        },
+        "deprecated": false
+    },
+    {
+        "id": "b333b199.a9108",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "Shutdown",
+        "description": "",
+        "tags": "Power",
+        "consumes": "",
+        "produces": "",
+        "parameters": [],
+        "responses": {
+            "200": {
+                "description": "OK"
+            }
+        },
+        "deprecated": false
+    },
+    {
+        "id": "a155468f.0b7558",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "Flash nRF51",
+        "description": "RST:18<br>SWDIO:24<br>SWDCLK:25",
+        "tags": "nRF51",
+        "consumes": "text/plain",
+        "produces": "",
+        "parameters": [
+            {
+                "name": "firmware",
+                "in": "body",
+                "description": "Base64 encoded hex",
+                "required": true,
+                "schema": {
+                    "type": "object"
+                }
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "OK"
+            }
+        },
+        "deprecated": false
+    },
+    {
+        "id": "deec8ee8.3329c",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "Reboot",
+        "description": "",
+        "tags": "Power",
+        "consumes": "",
+        "produces": "",
+        "parameters": [],
+        "responses": {
+            "200": {
+                "description": "OK"
+            }
+        },
+        "deprecated": false
+    },
+    {
+        "id": "b226f9aa.19ac38",
+        "type": "http in",
+        "z": "a39a4057.2994",
+        "name": "",
+        "url": "/toggle/37",
+        "method": "post",
+        "swaggerDoc": "147f5c0a.48f124",
+        "x": 123,
+        "y": 88,
+        "wires": [
+            [
+                "8ceed1f0.abe03"
+            ]
+        ]
+    },
+    {
+        "id": "8ceed1f0.abe03",
+        "type": "function",
+        "z": "a39a4057.2994",
+        "name": "toggle",
+        "func": "context.global.P37 = context.global.P37 ? 0 : 1;\nmsg.payload = context.global.P37\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 310.5,
+        "y": 88,
+        "wires": [
+            [
+                "a8db2be1.9a1d08",
+                "42c0b744.421c48"
+            ]
+        ]
+    },
+    {
+        "id": "a8db2be1.9a1d08",
+        "type": "http response",
+        "z": "a39a4057.2994",
+        "name": "OK",
+        "x": 454.5,
+        "y": 127,
+        "wires": []
+    },
+    {
+        "id": "42c0b744.421c48",
+        "type": "rpi-gpio out",
+        "z": "a39a4057.2994",
+        "name": "37",
+        "pin": "37",
+        "set": false,
+        "level": "0",
+        "out": "out",
+        "x": 453.5,
+        "y": 57,
+        "wires": []
+    },
+    {
+        "id": "dc83b440.ca6d48",
+        "type": "http response",
+        "z": "2aca2241.addfbe",
+        "name": "OK",
+        "x": 369.5,
+        "y": 126,
+        "wires": []
+    },
+    {
+        "id": "cad6dd3c.aa16f",
+        "type": "exec",
+        "z": "2aca2241.addfbe",
+        "command": "sudo shutdown",
+        "addpay": false,
+        "append": "now",
+        "useSpawn": "",
+        "timer": "",
+        "name": "",
+        "x": 398.5,
+        "y": 77.5,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "680f5103.61ebc",
+        "type": "http in",
+        "z": "2aca2241.addfbe",
+        "name": "",
+        "url": "/shutdown",
+        "method": "post",
+        "swaggerDoc": "b333b199.a9108",
+        "x": 138.5,
+        "y": 78,
+        "wires": [
+            [
+                "cad6dd3c.aa16f",
+                "dc83b440.ca6d48"
+            ]
+        ]
+    },
+    {
+        "id": "ed4657.acb2d9a8",
+        "type": "http in",
+        "z": "3b57119.fef17ee",
+        "name": "",
+        "url": "/nrf51/flash/",
+        "method": "post",
+        "swaggerDoc": "a155468f.0b7558",
+        "x": 143,
+        "y": 51,
+        "wires": [
+            [
+                "bd29712f.95951",
+                "2938f346.0482ec"
+            ]
+        ]
+    },
+    {
+        "id": "581bdf71.f45c1",
+        "type": "http response",
+        "z": "3b57119.fef17ee",
+        "name": "OK",
+        "x": 476,
+        "y": 99,
+        "wires": []
+    },
+    {
+        "id": "bd29712f.95951",
+        "type": "function",
+        "z": "3b57119.fef17ee",
+        "name": "decode",
+        "func": "msg.payload = Buffer.from(msg.payload, 'base64');\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 255.5,
+        "y": 126,
+        "wires": [
+            [
+                "90dccb7.b52fd38"
+            ]
+        ]
+    },
+    {
+        "id": "90dccb7.b52fd38",
+        "type": "file",
+        "z": "3b57119.fef17ee",
+        "name": "firmware.hex",
+        "filename": "/tmp/openocd/firmware.hex",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "x": 357.5,
+        "y": 184,
+        "wires": []
+    },
+    {
+        "id": "82634756.4dd898",
+        "type": "http in",
+        "z": "2aca2241.addfbe",
+        "name": "",
+        "url": "/reboot",
+        "method": "post",
+        "swaggerDoc": "deec8ee8.3329c",
+        "x": 130.5,
+        "y": 175,
+        "wires": [
+            [
+                "ea59505a.21171",
+                "dc83b440.ca6d48"
+            ]
+        ]
+    },
+    {
+        "id": "ea59505a.21171",
+        "type": "exec",
+        "z": "2aca2241.addfbe",
+        "command": "sudo reboot",
+        "addpay": false,
+        "append": "",
+        "useSpawn": "",
+        "timer": "",
+        "name": "",
+        "x": 389.5,
+        "y": 174.5,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "d24aa65d.caeb68",
+        "type": "exec",
+        "z": "b6cd8abc.bda2e8",
+        "command": "cd /tmp/openocd/ && sudo openocd",
+        "addpay": false,
+        "append": "",
+        "useSpawn": false,
+        "timer": "",
+        "name": "openocd",
+        "x": 251,
+        "y": 125,
+        "wires": [
+            [],
+            [
+                "584a7d4c.15da44"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "46147e62.4d249",
+        "type": "debug",
+        "z": "b6cd8abc.bda2e8",
+        "name": "log",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 474,
+        "y": 58.5,
+        "wires": []
+    },
+    {
+        "id": "4f674346.4d688c",
+        "type": "template",
+        "z": "b6cd8abc.bda2e8",
+        "name": "prog-config",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "interface bcm2835gpio\nbcm2835gpio_peripheral_base 0x20000000\n\n# Transition delay calculation: SPEED_COEFF/khz - SPEED_OFFSET\n# These depend on system clock, calibrated for stock 700MHz\n# bcm2835gpio_speed SPEED_COEFF SPEED_OFFSET\nbcm2835gpio_speed_coeffs 146203 36\n\n# bcm2835gpio_swd_nums SWDCLK SWDIO\nbcm2835gpio_swd_nums 25 24\n\n# If you define trst or srst, use appropriate reset_config\n# bcm2835gpio_srst_num RST\nbcm2835gpio_srst_num 18\n\nreset_config srst_only srst_push_pull\n",
+        "x": 263.5,
+        "y": 183.5,
+        "wires": [
+            [
+                "990bf281.37c6d"
+            ]
+        ]
+    },
+    {
+        "id": "990bf281.37c6d",
+        "type": "file",
+        "z": "b6cd8abc.bda2e8",
+        "name": "prog.cfg",
+        "filename": "/tmp/openocd/prog.cfg",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "x": 435.5,
+        "y": 224.5,
+        "wires": []
+    },
+    {
+        "id": "4268bdaf.5d4124",
+        "type": "template",
+        "z": "b6cd8abc.bda2e8",
+        "name": "target-config",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "source ./prog.cfg\ntransport select swd\nset WORKAREASIZE 0\n \nset CHIPNAME nrf51822\nsource [find target/nrf51.cfg]\n \nreset_config  srst_nogate\n \nadapter_nsrst_delay 100\nadapter_nsrst_assert_width 100\n \ninit\nhalt\nnrf51 mass_erase\nsleep 500\nflash write_image ./firmware.hex\nsleep 30000\nverify_image ./firmware.hex\nreset\nshutdown\n",
+        "x": 263.5,
+        "y": 232.5,
+        "wires": [
+            [
+                "4614afcb.79a44"
+            ]
+        ]
+    },
+    {
+        "id": "4614afcb.79a44",
+        "type": "file",
+        "z": "b6cd8abc.bda2e8",
+        "name": "opennocd.cfg",
+        "filename": "/tmp/openocd/openocd.cfg",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "x": 444.5,
+        "y": 278.5,
+        "wires": []
+    },
+    {
+        "id": "584a7d4c.15da44",
+        "type": "function",
+        "z": "b6cd8abc.bda2e8",
+        "name": "format",
+        "func": "msg.payload = msg.payload.split(\"\\n\");\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 402.5,
+        "y": 125.5,
+        "wires": [
+            [
+                "46147e62.4d249"
+            ]
+        ]
+    },
+    {
+        "id": "819897ce.7c8408",
+        "type": "delay",
+        "z": "b6cd8abc.bda2e8",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 104,
+        "y": 100,
+        "wires": [
+            [
+                "d24aa65d.caeb68"
+            ]
+        ]
+    },
+    {
+        "id": "2938f346.0482ec",
+        "type": "subflow:b6cd8abc.bda2e8",
+        "z": "3b57119.fef17ee",
+        "x": 368.5,
+        "y": 34,
+        "wires": [
+            [
+                "581bdf71.f45c1"
+            ]
+        ]
+    }
+]

@@ -1,0 +1,6 @@
+# http://www.raspberrypi.org/documentation/configuration/config-txt.md
+
+dtparam=i2c_arm=on
+dtparam=spi=on
+dtparam=audio=on
+dtoverlay=dwc2

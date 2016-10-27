@@ -1,0 +1,17 @@
+[Unit]
+Description=RadAPI
+
+[Service]
+WorkingDirectory=/opt/node/radapi/
+ExecStart=/opt/node/latest/bin/node --max_old_space_size=256 /opt/node/radapi/index.js
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=radapi
+User=pi
+Group=pi
+Environment=NODE_ENV=production PORT=1880
+
+[Install]
+WantedBy=multi-user.target

@@ -20,7 +20,7 @@ sleep 10 # Wait for ssh
 
 echo "Bootstraping..."
 ssh $SSH_SILENT pi "mkdir -p ~/.ssh && echo $PUBLIC_KEY > .ssh/authorized_keys"
-scp ./home/* pi:
+scp -rp ./home/* pi:
 ssh $SSH_SILENT pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen"
 
 echo "Installing..."

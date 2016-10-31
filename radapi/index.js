@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+/*jshint esversion: 6 */
 "use strict";
 
 var http = require("http");
@@ -41,10 +41,7 @@ var settings = {
             swagger: "2.0",
             info: {
                 title: "z3r0",
-                description: `
-<a href='/edit' target='_blank'>Edit</a><br>
-<a href='http://pinout.xyz/'><img src='/raspberry-pi-pinout.png' width=500i height=156></a>
-                `,
+                description: "<a href=/edit target=_blank><img src=/raspberry-pi-pinout.png width=500 height=156></a>",
                 version: "0.0.0"
             }
         }
@@ -60,7 +57,6 @@ var settings = {
 var app = express();
 var server = http.createServer(app);
 
-app.disable("x-powered-by");
 app.set("etag", "strong");
 app.use("/", express.static(path.resolve(__dirname, "public")));
 RED.init(server, settings);

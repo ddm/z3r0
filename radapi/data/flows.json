@@ -38,13 +38,9 @@
         ],
         "out": [
             {
-                "x": 428,
-                "y": 33,
+                "x": 398,
+                "y": 25,
                 "wires": [
-                    {
-                        "id": "d24aa65d.caeb68",
-                        "port": 2
-                    },
                     {
                         "id": "d24aa65d.caeb68",
                         "port": 0
@@ -360,31 +356,13 @@
         "useSpawn": false,
         "timer": "",
         "name": "openocd",
-        "x": 246,
-        "y": 135,
+        "x": 327,
+        "y": 125,
         "wires": [
-            [
-                "46147e62.4d249"
-            ],
-            [
-                "46147e62.4d249"
-            ],
-            [
-                "46147e62.4d249"
-            ]
+            [],
+            [],
+            []
         ]
-    },
-    {
-        "id": "46147e62.4d249",
-        "type": "debug",
-        "z": "b6cd8abc.bda2e8",
-        "name": "debug",
-        "active": true,
-        "console": "false",
-        "complete": "payload",
-        "x": 458,
-        "y": 81.5,
-        "wires": []
     },
     {
         "id": "4f674346.4d688c",
@@ -528,7 +506,7 @@
         "id": "b43f7523.6fe2c8",
         "type": "debug",
         "z": "2aca2241.addfbe",
-        "name": "debug",
+        "name": "log",
         "active": true,
         "console": "false",
         "complete": "payload",
@@ -560,15 +538,10 @@
         "y": 82.5,
         "wires": [
             [
-                "819897ce.7c8408",
-                "46147e62.4d249"
+                "819897ce.7c8408"
             ],
-            [
-                "46147e62.4d249"
-            ],
-            [
-                "46147e62.4d249"
-            ]
+            [],
+            []
         ]
     }
 ]

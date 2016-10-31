@@ -17,7 +17,7 @@
     {
         "id": "b6cd8abc.bda2e8",
         "type": "subflow",
-        "name": "nRF Prog",
+        "name": "nRF51",
         "info": "",
         "in": [
             {
@@ -31,16 +31,20 @@
                         "id": "4268bdaf.5d4124"
                     },
                     {
-                        "id": "819897ce.7c8408"
+                        "id": "3071e45.9ef601c"
                     }
                 ]
             }
         ],
         "out": [
             {
-                "x": 369,
-                "y": 60,
+                "x": 428,
+                "y": 33,
                 "wires": [
+                    {
+                        "id": "d24aa65d.caeb68",
+                        "port": 2
+                    },
                     {
                         "id": "d24aa65d.caeb68",
                         "port": 0
@@ -98,7 +102,7 @@
                 "name": "firmware",
                 "in": "body",
                 "description": "Base64 encoded hex",
-                "required": true,
+                "required": false,
                 "schema": {
                     "type": "object"
                 }
@@ -205,8 +209,8 @@
         "type": "http response",
         "z": "2aca2241.addfbe",
         "name": "OK",
-        "x": 370.5,
-        "y": 216,
+        "x": 654.5,
+        "y": 319,
         "wires": []
     },
     {
@@ -259,11 +263,11 @@
         "method": "post",
         "swaggerDoc": "a155468f.0b7558",
         "x": 143,
-        "y": 51,
+        "y": 63,
         "wires": [
             [
-                "bd29712f.95951",
-                "2938f346.0482ec"
+                "2938f346.0482ec",
+                "bd29712f.95951"
             ]
         ]
     },
@@ -273,7 +277,7 @@
         "z": "3b57119.fef17ee",
         "name": "OK",
         "x": 476,
-        "y": 99,
+        "y": 111,
         "wires": []
     },
     {
@@ -281,11 +285,11 @@
         "type": "function",
         "z": "3b57119.fef17ee",
         "name": "decode",
-        "func": "msg.payload = Buffer.from(msg.payload, 'base64');\nreturn msg;",
+        "func": "context.global.firmware = msg.payload ? Buffer.from(msg.payload, 'base64') : context.global.firmware;\nmsg.payload = context.global.firmware;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 255.5,
-        "y": 126,
+        "x": 251.5,
+        "y": 140,
         "wires": [
             [
                 "90dccb7.b52fd38"
@@ -296,13 +300,13 @@
         "id": "90dccb7.b52fd38",
         "type": "file",
         "z": "3b57119.fef17ee",
-        "name": "firmware.hex",
-        "filename": "/tmp/openocd/firmware.hex",
+        "name": "",
+        "filename": "/tmp/openocd/nrf51/firmware.hex",
         "appendNewline": false,
         "createDir": true,
         "overwriteFile": "true",
-        "x": 357.5,
-        "y": 184,
+        "x": 429.5,
+        "y": 228,
         "wires": []
     },
     {
@@ -350,46 +354,50 @@
         "id": "d24aa65d.caeb68",
         "type": "exec",
         "z": "b6cd8abc.bda2e8",
-        "command": "cd /tmp/openocd/ && sudo openocd",
+        "command": "cd /tmp/openocd/nrf51/ && sudo openocd",
         "addpay": false,
         "append": "",
         "useSpawn": false,
         "timer": "",
         "name": "openocd",
-        "x": 251,
-        "y": 125,
+        "x": 246,
+        "y": 135,
         "wires": [
-            [],
             [
-                "584a7d4c.15da44"
+                "46147e62.4d249"
             ],
-            []
+            [
+                "46147e62.4d249"
+            ],
+            [
+                "46147e62.4d249"
+            ]
         ]
     },
     {
         "id": "46147e62.4d249",
         "type": "debug",
         "z": "b6cd8abc.bda2e8",
-        "name": "log",
+        "name": "debug",
         "active": true,
         "console": "false",
         "complete": "payload",
-        "x": 474,
-        "y": 58.5,
+        "x": 458,
+        "y": 81.5,
         "wires": []
     },
     {
         "id": "4f674346.4d688c",
         "type": "template",
         "z": "b6cd8abc.bda2e8",
-        "name": "prog-config",
+        "name": "programmer",
         "field": "payload",
         "fieldType": "msg",
-        "format": "handlebars",
-        "syntax": "mustache",
-        "template": "interface bcm2835gpio\nbcm2835gpio_peripheral_base 0x20000000\n\n# Transition delay calculation: SPEED_COEFF/khz - SPEED_OFFSET\n# These depend on system clock, calibrated for stock 700MHz\n# bcm2835gpio_speed SPEED_COEFF SPEED_OFFSET\nbcm2835gpio_speed_coeffs 146203 36\n\n# bcm2835gpio_swd_nums SWDCLK SWDIO\nbcm2835gpio_swd_nums 25 24\n\n# If you define trst or srst, use appropriate reset_config\n# bcm2835gpio_srst_num RST\nbcm2835gpio_srst_num 18\n\nreset_config srst_only srst_push_pull\n",
-        "x": 263.5,
-        "y": 183.5,
+        "format": "text",
+        "syntax": "plain",
+        "template": "interface bcm2835gpio\nbcm2835gpio_peripheral_base 0x20000000\n\n# Transition delay calculation: SPEED_COEFF/khz - SPEED_OFFSET\n# These depend on system clock, calibrated for stock 700MHz\n# bcm2835gpio_speed SPEED_COEFF SPEED_OFFSET\nbcm2835gpio_speed_coeffs 146203 36\n\n# bcm2835gpio_swd_nums SWDCLK SWDIO\nbcm2835gpio_swd_nums 25 24\n\n# bcm2835gpio_srst_num RST\nbcm2835gpio_srst_num 18\n\nreset_config srst_only srst_push_pull\n",
+        "x": 170.5,
+        "y": 182.5,
         "wires": [
             [
                 "990bf281.37c6d"
@@ -400,27 +408,27 @@
         "id": "990bf281.37c6d",
         "type": "file",
         "z": "b6cd8abc.bda2e8",
-        "name": "prog.cfg",
-        "filename": "/tmp/openocd/prog.cfg",
+        "name": "",
+        "filename": "/tmp/openocd/nrf51/programmer.cfg",
         "appendNewline": false,
         "createDir": true,
         "overwriteFile": "true",
-        "x": 463.5,
-        "y": 225.5,
+        "x": 420.5,
+        "y": 182.5,
         "wires": []
     },
     {
         "id": "4268bdaf.5d4124",
         "type": "template",
         "z": "b6cd8abc.bda2e8",
-        "name": "target-config",
+        "name": "target",
         "field": "payload",
         "fieldType": "msg",
-        "format": "handlebars",
-        "syntax": "mustache",
-        "template": "source prog.cfg\ntransport select swd\nset WORKAREASIZE 0\n \nset CHIPNAME nrf51822\nsource [find target/nrf51.cfg]\n \nreset_config  srst_nogate\n \nadapter_nsrst_delay 100\nadapter_nsrst_assert_width 100\n \ninit\nhalt\nnrf51 mass_erase\nflash write_image firmware.hex\nverify_image firmware.hex\nreset\nshutdown\n",
-        "x": 263.5,
-        "y": 232.5,
+        "format": "text",
+        "syntax": "plain",
+        "template": "source programmer.cfg\ntransport select swd\n\nset WORKAREASIZE 0\nset CHIPNAME nrf51822\nsource [find target/nrf51.cfg]\nreset_config srst_nogate\nadapter_nsrst_delay 100\nadapter_nsrst_assert_width 100\n\ninit\nhalt\nnrf51 mass_erase\nflash write_image firmware.hex\nverify_image firmware.hex\nshutdown\n",
+        "x": 150.5,
+        "y": 231.5,
         "wires": [
             [
                 "4614afcb.79a44"
@@ -431,30 +439,14 @@
         "id": "4614afcb.79a44",
         "type": "file",
         "z": "b6cd8abc.bda2e8",
-        "name": "opennocd.cfg",
-        "filename": "/tmp/openocd/openocd.cfg",
+        "name": "",
+        "filename": "/tmp/openocd/nrf51/openocd.cfg",
         "appendNewline": false,
         "createDir": true,
         "overwriteFile": "true",
-        "x": 444.5,
-        "y": 278.5,
+        "x": 410.5,
+        "y": 231.5,
         "wires": []
-    },
-    {
-        "id": "584a7d4c.15da44",
-        "type": "function",
-        "z": "b6cd8abc.bda2e8",
-        "name": "format",
-        "func": "msg.payload = msg.payload.split(\"\\n\");\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 402.5,
-        "y": 125.5,
-        "wires": [
-            [
-                "46147e62.4d249"
-            ]
-        ]
     },
     {
         "id": "819897ce.7c8408",
@@ -471,8 +463,8 @@
         "randomLast": "5",
         "randomUnits": "seconds",
         "drop": false,
-        "x": 104,
-        "y": 100,
+        "x": 212,
+        "y": 23,
         "wires": [
             [
                 "d24aa65d.caeb68"
@@ -484,7 +476,7 @@
         "type": "subflow:b6cd8abc.bda2e8",
         "z": "3b57119.fef17ee",
         "x": 368.5,
-        "y": 34,
+        "y": 46,
         "wires": [
             [
                 "581bdf71.f45c1"
@@ -511,13 +503,13 @@
         "id": "491435e4.7dcedc",
         "type": "exec",
         "z": "2aca2241.addfbe",
-        "command": "sudo apt-get update && sudo apt-get dist-upgrade",
+        "command": "sudo apt-get update && sudo apt-get -y upgrade",
         "addpay": false,
         "append": "",
         "useSpawn": false,
         "timer": "",
-        "name": "upgrade",
-        "x": 345.5,
+        "name": "",
+        "x": 475.5,
         "y": 156.5,
         "wires": [
             [
@@ -536,12 +528,47 @@
         "id": "b43f7523.6fe2c8",
         "type": "debug",
         "z": "2aca2241.addfbe",
-        "name": "",
+        "name": "debug",
         "active": true,
         "console": "false",
-        "complete": "false",
-        "x": 389.5,
-        "y": 265,
+        "complete": "payload",
+        "x": 416.5,
+        "y": 318,
         "wires": []
+    },
+    {
+        "id": "4f4c4229.05648c",
+        "type": "comment",
+        "z": "b6cd8abc.bda2e8",
+        "name": "/tmp/openocd/nrf51/firmware.hex",
+        "info": "Expects the firmware (with SoftDevice) already available in /tmp/openocd/firmware.hex",
+        "x": 163.5,
+        "y": 281,
+        "wires": []
+    },
+    {
+        "id": "3071e45.9ef601c",
+        "type": "exec",
+        "z": "b6cd8abc.bda2e8",
+        "command": "sudo kill -9 `ps -ef | grep openocd | grep -v grep | awk '{ print $2 }'`",
+        "addpay": false,
+        "append": "",
+        "useSpawn": "",
+        "timer": "",
+        "name": "killopenocd",
+        "x": 102.5,
+        "y": 82.5,
+        "wires": [
+            [
+                "819897ce.7c8408",
+                "46147e62.4d249"
+            ],
+            [
+                "46147e62.4d249"
+            ],
+            [
+                "46147e62.4d249"
+            ]
+        ]
     }
 ]

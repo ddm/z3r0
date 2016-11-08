@@ -4,3 +4,4 @@ dtparam=i2c_arm=on
 dtparam=spi=on
 dtparam=audio=on
 dtoverlay=dwc2
+enable_uart=1

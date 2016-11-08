@@ -19,15 +19,20 @@ sleep 10 # Wait for ssh
 
 echo "Bootstraping..."
 ssh pi "mkdir -p ~/.ssh && echo $PUBLIC_KEY > .ssh/authorized_keys"
-scp -rp ./home/* pi:
+scp ./home/* pi:
+scp ./home/.* pi:
 ssh pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen"
 
 echo "Installing..."
 ssh pi << 'EOF'
   echo "Dependencies..."
   sudo apt-get update
-  sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev
+  sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev picocom vim tmux ruby
   sudo apt-get clean
+  echo "Tmuxinator..."
+  wget -O /home/pi/tmuxinator.bash https://raw.githubusercontent.com/tmuxinator/tmuxinator/master/completion/tmuxinator.bash
+  sudo gem install tmuxinator
+  mkdir -p /home/pi/.tmuxinator/ && mv /home/pi/voltron.yml /home/pi/.tmuxinator/
   echo "OpenOCD..."
   git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
   cd /home/pi/openocd/
@@ -46,10 +51,22 @@ ssh pi << 'EOF'
   rm /opt/node/$NODE_PACKAGE.tar.xz
   ln -s /opt/node/$NODE_PACKAGE /opt/node/latest
   export PATH="$PATH:/opt/node/latest/bin/"
+  echo "Volton..."
+  git clone https://github.com/snare/voltron /home/pi/voltron
+  cd /home/pi/voltron
+  ./install.sh
+  git clone https://github.com/snare/voltron-web.git /home/pi/voltron-web
+  cd /home/pi/voltron-web/voltron_web/static
+  npm install
+  npm install -g webpack
+  webpack
+  cd /home/pi/voltron-web
+  sudo python setup.py install
   echo "RadAPI..."
   git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
   cd /opt/node/radapi
   npm install
+  sudo chown -R pi:pi /opt/node/radapi
   mkdir -p /opt/node/radapi/data/
 EOF
 

@@ -23,7 +23,7 @@ sudo sh -c "$COMMAND"
 sleep 5
 
 echo "Configuring RNDIS tethering..."
-cp $DIR/boot/*.txt /Volumes/boot/
+cp $DIR/boot/* /Volumes/boot/
 
 echo "Ejecting SD Card..."
 sudo diskutil eject /dev/disk2

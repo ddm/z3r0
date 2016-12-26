@@ -27,7 +27,7 @@ echo "Installing..."
 ssh pi << 'EOF'
   echo "Dependencies..."
   sudo apt-get update
-  sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev picocom vim tmux ruby
+  sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev picocom vim tmux ruby openjdk-8-jdk
   sudo apt-get clean
   echo "Tmuxinator..."
   wget -O /home/pi/tmuxinator.bash https://raw.githubusercontent.com/tmuxinator/tmuxinator/master/completion/tmuxinator.bash
@@ -40,8 +40,19 @@ ssh pi << 'EOF'
   ./configure --enable-sysfsgpio --enable-bcm2835gpio
   make
   sudo make install
+  echo "Closure compiler..."
+  sudo mkdir -p /opt/closure-compiler/
+  sudo chown pi:pi /opt/closure-compiler/
+  cd /opt/closure-compiler/
+  rm -f /opt/closure-compiler/*
+  wget https://dl.google.com/closure-compiler/compiler-latest.zip
+  unzip compiler-latest.zip
+  rm compiler-latest.zip
+  CLOSURE_COMPILER_JAR="`readlink -f $(ls closure-compiler-*.jar)`"
+  CLOSURE_COMPILER_LINK="`dirname $CLOSURE_COMPILER_JAR`/closure-compiler.jar"
+  ln -s $CLOSURE_COMPILER_JAR $CLOSURE_COMPILER_LINK
   echo "Node.js..."
-  export NODE_VERSION="v6.9.1"
+  export NODE_VERSION="v6.9.2"
   sudo mkdir -p /opt/node/
   sudo chown pi:pi /opt/node/
   export NODE_PACKAGE="node-$NODE_VERSION-linux-armv6l"
@@ -66,6 +77,13 @@ ssh pi << 'EOF'
   git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
   cd /opt/node/radapi
   npm install
+  mv node_modules/node-red-ddm node_modules/node-red
+  mv node_modules/node-red-node-swagger-ddm node_modules/node-red-node-swagger
+  cd /opt/node/radapi/node_modules/swagger-ui/
+  npm install
+  npm install -g bower
+  bower install
+  npm run build
   sudo chown -R pi:pi /opt/node/radapi
   mkdir -p /opt/node/radapi/data/
 EOF

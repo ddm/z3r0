@@ -10,23 +10,20 @@
         "label": "Ops"
     },
     {
-        "id": "3b57119.fef17ee",
+        "id": "e907119b.094bb",
         "type": "tab",
-        "label": "nRF51"
+        "label": "SWD"
     },
     {
         "id": "b6cd8abc.bda2e8",
         "type": "subflow",
-        "name": "nRF51",
+        "name": "SWD",
         "info": "",
         "in": [
             {
                 "x": 46,
                 "y": 301,
                 "wires": [
-                    {
-                        "id": "4268bdaf.5d4124"
-                    },
                     {
                         "id": "a846fbd3.5bb0b8"
                     },
@@ -85,33 +82,6 @@
         "deprecated": false
     },
     {
-        "id": "a155468f.0b7558",
-        "type": "swagger-doc",
-        "z": "",
-        "summary": "Flash nRF51",
-        "description": "RST:18<br>SWDIO:24<br>SWDCLK:25",
-        "tags": "nRF51",
-        "consumes": "text/plain",
-        "produces": "",
-        "parameters": [
-            {
-                "name": "firmware",
-                "in": "body",
-                "description": "Base64 encoded hex",
-                "required": false,
-                "schema": {
-                    "type": "object"
-                }
-            }
-        ],
-        "responses": {
-            "200": {
-                "description": "OK"
-            }
-        },
-        "deprecated": false
-    },
-    {
         "id": "deec8ee8.3329c",
         "type": "swagger-doc",
         "z": "",
@@ -146,6 +116,45 @@
         "deprecated": false
     },
     {
+        "id": "a27461b1.ede15",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "Flash firmware using SWD",
+        "description": "",
+        "tags": "MCU",
+        "consumes": "text/plain",
+        "produces": "",
+        "parameters": [
+            {
+                "name": "chip",
+                "in": "path",
+                "description": "Chip model",
+                "required": true,
+                "type": "string",
+                "enum": [
+                    "nrf51",
+                    "lpc810"
+                ]
+            },
+            {
+                "name": "firmware",
+                "in": "body",
+                "description": "Base64",
+                "required": true,
+                "schema": {
+                    "type": "object"
+                }
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "OK",
+                "code": "200"
+            }
+        },
+        "deprecated": false
+    },
+    {
         "id": "b226f9aa.19ac38",
         "type": "http in",
         "z": "a39a4057.2994",
@@ -166,7 +175,7 @@
         "type": "function",
         "z": "a39a4057.2994",
         "name": "toggle",
-        "func": "context.global.P37 = context.global.P37 ? 0 : 1;\nmsg.payload = context.global.P37\nreturn msg;",
+        "func": "context.global.P37 = context.global.P37 ? 0 : 1;\nmsg.payload = context.global.P37;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 310.5,
@@ -251,61 +260,6 @@
         ]
     },
     {
-        "id": "ed4657.acb2d9a8",
-        "type": "http in",
-        "z": "3b57119.fef17ee",
-        "name": "",
-        "url": "/nrf51/flash/",
-        "method": "post",
-        "swaggerDoc": "a155468f.0b7558",
-        "x": 143,
-        "y": 63,
-        "wires": [
-            [
-                "2938f346.0482ec",
-                "bd29712f.95951"
-            ]
-        ]
-    },
-    {
-        "id": "581bdf71.f45c1",
-        "type": "http response",
-        "z": "3b57119.fef17ee",
-        "name": "OK",
-        "x": 476,
-        "y": 111,
-        "wires": []
-    },
-    {
-        "id": "bd29712f.95951",
-        "type": "function",
-        "z": "3b57119.fef17ee",
-        "name": "decode",
-        "func": "context.global.firmware = msg.payload ? Buffer.from(msg.payload, 'base64') : context.global.firmware;\nmsg.payload = context.global.firmware;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 251.5,
-        "y": 140,
-        "wires": [
-            [
-                "90dccb7.b52fd38"
-            ]
-        ]
-    },
-    {
-        "id": "90dccb7.b52fd38",
-        "type": "file",
-        "z": "3b57119.fef17ee",
-        "name": "",
-        "filename": "/tmp/openocd/nrf51/firmware.hex",
-        "appendNewline": false,
-        "createDir": true,
-        "overwriteFile": "true",
-        "x": 429.5,
-        "y": 228,
-        "wires": []
-    },
-    {
         "id": "82634756.4dd898",
         "type": "http in",
         "z": "2aca2241.addfbe",
@@ -350,7 +304,7 @@
         "id": "d24aa65d.caeb68",
         "type": "exec",
         "z": "b6cd8abc.bda2e8",
-        "command": "cd /tmp/openocd/nrf51/ && sudo openocd",
+        "command": "cd /tmp/openocd/ && sudo openocd",
         "addpay": false,
         "append": "",
         "useSpawn": false,
@@ -359,9 +313,15 @@
         "x": 462,
         "y": 117,
         "wires": [
-            [],
-            [],
-            []
+            [
+                "87d47d0b.d77aa"
+            ],
+            [
+                "87d47d0b.d77aa"
+            ],
+            [
+                "87d47d0b.d77aa"
+            ]
         ]
     },
     {
@@ -373,7 +333,7 @@
         "fieldType": "msg",
         "format": "handlebars",
         "syntax": "mustache",
-        "template": "interface bcm2835gpio\nbcm2835gpio_peripheral_base {{bcm2835gpio_peripheral_base}}\n\n# Transition delay calculation: SPEED_COEFF/khz - SPEED_OFFSET\n# These depend on system clock, calibrated for stock 700MHz\n# bcm2835gpio_speed SPEED_COEFF SPEED_OFFSET\nbcm2835gpio_speed_coeffs 146203 36\n\n# bcm2835gpio_swd_nums SWDCLK SWDIO\nbcm2835gpio_swd_nums 25 24\n\n# bcm2835gpio_srst_num RST\nbcm2835gpio_srst_num 18\n\nreset_config srst_only srst_push_pull\n",
+        "template": "interface bcm2835gpio\nbcm2835gpio_peripheral_base {{bcm2835gpio_peripheral_base}}\n\n# Transition delay calculation: SPEED_COEFF/khz - SPEED_OFFSET\n# These depend on system clock, calibrated for stock 700MHz\n# bcm2835gpio_speed SPEED_COEFF SPEED_OFFSET\nbcm2835gpio_speed_coeffs 146203 36\n\n# bcm2835gpio_swd_nums SWDCLK SWDIO\nbcm2835gpio_swd_nums 25 24\n\n# bcm2835gpio_srst_num RST\nbcm2835gpio_srst_num 18\n",
         "x": 304.5,
         "y": 300.5,
         "wires": [
@@ -387,56 +347,13 @@
         "type": "file",
         "z": "b6cd8abc.bda2e8",
         "name": "",
-        "filename": "/tmp/openocd/nrf51/programmer.cfg",
+        "filename": "/tmp/openocd/programmer.cfg",
         "appendNewline": false,
         "createDir": true,
         "overwriteFile": "true",
-        "x": 554.5,
+        "x": 534.5,
         "y": 300.5,
         "wires": []
-    },
-    {
-        "id": "4268bdaf.5d4124",
-        "type": "template",
-        "z": "b6cd8abc.bda2e8",
-        "name": "target",
-        "field": "payload",
-        "fieldType": "msg",
-        "format": "text",
-        "syntax": "plain",
-        "template": "source programmer.cfg\ntransport select swd\n\nset WORKAREASIZE 0\nset CHIPNAME nrf51822\nsource [find target/nrf51.cfg]\nreset_config srst_nogate\nadapter_nsrst_delay 100\nadapter_nsrst_assert_width 100\n\ninit\nhalt\nnrf51 mass_erase\nflash write_image firmware.hex\nverify_image firmware.hex\nshutdown\n",
-        "x": 284.5,
-        "y": 349.5,
-        "wires": [
-            [
-                "4614afcb.79a44"
-            ]
-        ]
-    },
-    {
-        "id": "4614afcb.79a44",
-        "type": "file",
-        "z": "b6cd8abc.bda2e8",
-        "name": "",
-        "filename": "/tmp/openocd/nrf51/openocd.cfg",
-        "appendNewline": false,
-        "createDir": true,
-        "overwriteFile": "true",
-        "x": 544.5,
-        "y": 349.5,
-        "wires": []
-    },
-    {
-        "id": "2938f346.0482ec",
-        "type": "subflow:b6cd8abc.bda2e8",
-        "z": "3b57119.fef17ee",
-        "x": 368.5,
-        "y": 46,
-        "wires": [
-            [
-                "581bdf71.f45c1"
-            ]
-        ]
     },
     {
         "id": "97eb08ab.2161d8",
@@ -489,16 +406,6 @@
         "complete": "payload",
         "x": 416.5,
         "y": 318,
-        "wires": []
-    },
-    {
-        "id": "4f4c4229.05648c",
-        "type": "comment",
-        "z": "b6cd8abc.bda2e8",
-        "name": "/tmp/openocd/nrf51/firmware.hex",
-        "info": "Expects the firmware (with SoftDevice) already available in /tmp/openocd/firmware.hex",
-        "x": 166.5,
-        "y": 399,
         "wires": []
     },
     {
@@ -579,5 +486,166 @@
                 "d24aa65d.caeb68"
             ]
         ]
+    },
+    {
+        "id": "c5095ac4.c784e8",
+        "type": "http response",
+        "z": "e907119b.094bb",
+        "name": "OK",
+        "x": 569,
+        "y": 121,
+        "wires": []
+    },
+    {
+        "id": "331e1ef8.211232",
+        "type": "function",
+        "z": "e907119b.094bb",
+        "name": "decode",
+        "func": "context.global.firmware = msg.payload ? Buffer.from(msg.payload, 'base64') : context.global.firmware;\nmsg.payload = context.global.firmware;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 396.5,
+        "y": 172,
+        "wires": [
+            [
+                "65e09c49.406c94"
+            ]
+        ]
+    },
+    {
+        "id": "65e09c49.406c94",
+        "type": "file",
+        "z": "e907119b.094bb",
+        "name": "",
+        "filename": "/tmp/openocd/firmware.hex",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "x": 610.5,
+        "y": 172,
+        "wires": []
+    },
+    {
+        "id": "d53a7139.5095a",
+        "type": "subflow:b6cd8abc.bda2e8",
+        "z": "e907119b.094bb",
+        "x": 461.5,
+        "y": 56,
+        "wires": [
+            [
+                "c5095ac4.c784e8"
+            ]
+        ]
+    },
+    {
+        "id": "73d2c75a.b5bcf8",
+        "type": "http in",
+        "z": "e907119b.094bb",
+        "name": "",
+        "url": "/swd/flash/:chip",
+        "method": "post",
+        "swaggerDoc": "a27461b1.ede15",
+        "x": 158.5,
+        "y": 85,
+        "wires": [
+            [
+                "d53a7139.5095a",
+                "331e1ef8.211232",
+                "665f80dd.3bf42"
+            ]
+        ]
+    },
+    {
+        "id": "665f80dd.3bf42",
+        "type": "switch",
+        "z": "e907119b.094bb",
+        "name": "",
+        "property": "req.params.chip",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "nrf51",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "lpc810",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "outputs": 2,
+        "x": 183,
+        "y": 257,
+        "wires": [
+            [
+                "b5cf3381.8f30b"
+            ],
+            [
+                "79044996.395ac8"
+            ]
+        ]
+    },
+    {
+        "id": "b5cf3381.8f30b",
+        "type": "template",
+        "z": "e907119b.094bb",
+        "name": "nrf51822",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "text",
+        "syntax": "plain",
+        "template": "source programmer.cfg\ntransport select swd\n\nset WORKAREASIZE 0\nset CHIPNAME nrf51822\nsource [find target/nrf51.cfg]\nreset_config srst_only srst_nogate\nadapter_nsrst_delay 100\nadapter_nsrst_assert_width 100\n\ninit\nhalt\nnrf51 mass_erase\nflash write_image firmware.hex\nverify_image firmware.hex\nshutdown\n",
+        "x": 347,
+        "y": 236,
+        "wires": [
+            [
+                "d2858706.fb8c08"
+            ]
+        ]
+    },
+    {
+        "id": "d2858706.fb8c08",
+        "type": "file",
+        "z": "e907119b.094bb",
+        "name": "",
+        "filename": "/tmp/openocd/openocd.cfg",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "x": 608,
+        "y": 258,
+        "wires": []
+    },
+    {
+        "id": "79044996.395ac8",
+        "type": "template",
+        "z": "e907119b.094bb",
+        "name": "lpc810",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "text",
+        "syntax": "plain",
+        "template": "source programmer.cfg\ntransport select swd\n\nset CHIPNAME lpc810\nsource [find target/lpc8xx.cfg]\nreset_config srst_only srst_pull_up\n \ninit\ntargets\nreset halt\n",
+        "x": 337,
+        "y": 281,
+        "wires": [
+            [
+                "d2858706.fb8c08"
+            ]
+        ]
+    },
+    {
+        "id": "87d47d0b.d77aa",
+        "type": "debug",
+        "z": "b6cd8abc.bda2e8",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 698,
+        "y": 178,
+        "wires": []
     }
 ]

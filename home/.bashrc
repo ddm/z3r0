@@ -8,10 +8,10 @@ case $- in
       *) return;;
 esac
 
-HISTCONTROL=ignoreboth
+export HISTCONTROL=ignoreboth:erasedups
 shopt -s histappend
-HISTSIZE=1000
-HISTFILESIZE=2000
+export HISTSIZE=1000
+export HISTFILESIZE=2000
 
 shopt -s checkwinsize
 

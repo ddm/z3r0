@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 DIR=`dirname $0`
-RASPBIAN_RELEASE="2016-09-28"
-RASPBIAN_VERSION="2016-09-23"
+RASPBIAN_RELEASE="2016-11-29"
+RASPBIAN_VERSION="2016-11-25"
 if [ ! -f $DIR/$RASPBIAN_VERSION-raspbian-jessie-lite.img ]; then
   if [ ! -f $DIR/$RASPBIAN_VERSION-raspbian-jessie-lite.zip ]; then
     echo "Downloading Raspbian Jessie Lite..."

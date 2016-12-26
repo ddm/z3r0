@@ -21,7 +21,6 @@
   <script src='/edit/swagger-ui/reqs/lib/highlight.7.3.pack.js' type='text/javascript'></script>
   <script src='/edit/swagger-ui/reqs/lib/jsoneditor.min.js' type='text/javascript'></script>
   <script src='/edit/swagger-ui/reqs/lib/marked.js' type='text/javascript'></script>
-  <script src='/edit/swagger-ui/reqs/i18next.min.js' type='text/javascript'></script>
   <script type="text/javascript">
     $(function () {
       var url = "/endpoints/http-api/swagger.json";
@@ -37,14 +36,6 @@
         onFailure: function(data) {
           console.log("Unable to load SwaggerUI");
         },
-      });
-      i18n.init({
-          resGetPath: '/edit/swagger-ui/nls/__lng__/__ns__.json',
-          load: 'current',
-          ns: 'swagger',
-          fallbackLng: 'en-us'
-      }, function() {
-        console.log("i18n.init");
       });
       window.swaggerUi.load();
     });

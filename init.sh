@@ -52,7 +52,7 @@ ssh pi << 'EOF'
   CLOSURE_COMPILER_LINK="`dirname $CLOSURE_COMPILER_JAR`/closure-compiler.jar"
   ln -s $CLOSURE_COMPILER_JAR $CLOSURE_COMPILER_LINK
   echo "Node.js..."
-  export NODE_VERSION="v6.9.2"
+  export NODE_VERSION="v6.9.4"
   sudo mkdir -p /opt/node/
   sudo chown pi:pi /opt/node/
   export NODE_PACKAGE="node-$NODE_VERSION-linux-armv6l"
@@ -89,6 +89,7 @@ ssh pi << 'EOF'
 EOF
 
 echo "Configuring RadAPI..."
+scp $DIR/swagger-ui/swagger-ui.html /opt/node/radapi/node_modules/node-red-node-swagger/swagger/swagger-ui/
 scp $DIR/radapi/public/* pi:/opt/node/radapi/public/
 scp $DIR/radapi/data/* pi:/opt/node/radapi/data/
 scp $DIR/radapi/index.js pi:/opt/node/radapi/index.js

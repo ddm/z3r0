@@ -41,7 +41,7 @@ var settings = {
             swagger: "2.0",
             info: {
                 title: "z3r0",
-                description: "<a href=/edit target=_blank><img src=/raspberry-pi-pinout.png width=500 height=156></a>",
+                description: "![Pinout](/raspberry-pi-pinout.png)",
                 version: "0.0.0"
             }
         }

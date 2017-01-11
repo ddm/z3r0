@@ -25,16 +25,12 @@
     window.swaggerUi = new SwaggerUi({
       url: url,
       dom_id: "swagger-ui-container",
-	  validatorUrl: null,
+      validatorUrl: null,
       onComplete: function(data) {
-        if(window.swaggerUi.api.apisArray.length == 0){
-            $('.empty-swagger-doc').show(1000);
-        } else{
-            $('.empty-swagger-doc').hide(1000);
-        }
+          console.log("SwaggerUI loaded");
       },
       onFailure: function(data) {
-		console.log("Unable to load SwaggerUI");
+          console.log("Unable to load SwaggerUI");
       },
     });
     i18n.init({
@@ -70,20 +66,6 @@
 </head>
 
 <body class="swagger-section">
-  <div class="empty-swagger-doc">
-    <h2><span class="fa-stack fa-lg">
-        <i class="fa fa-circle-thin fa-stack-2x"></i>
-        <i class="fa fa-question fa-stack-1x"></i>
-    </span></h2>
-    <h2 data-i18n>swagger.helpBox.title</h2>
-    <p data-i18n>swagger.helpBox.swaggerIntro</p>
-    <p data-i18n>swagger.helpBox.swaggerInfo</p>
-    <p data-i18n>swagger.helpBox.swaggerInstructions0</p>
-    <p data-i18n>swagger.helpBox.swaggerInstructions1</p>
-    <p data-i18n>swagger.helpBox.swaggerInstructions2</p>
-    <p data-i18n>swagger.helpBox.swaggerOutro<p>
-  </div>
   <div id="swagger-ui-container" class="swagger-ui-wrap" style="margin: 10px"></div>
-
 </body>
 </html>

@@ -89,7 +89,7 @@ ssh pi << 'EOF'
 EOF
 
 echo "Configuring RadAPI..."
-scp $DIR/swagger-ui/swagger-ui.html /opt/node/radapi/node_modules/node-red-node-swagger/swagger/swagger-ui/
+scp $DIR/swagger-ui/swagger-ui.html pi:/opt/node/radapi/node_modules/node-red-node-swagger/swagger/swagger-ui/
 scp $DIR/radapi/public/* pi:/opt/node/radapi/public/
 scp $DIR/radapi/data/* pi:/opt/node/radapi/data/
 scp $DIR/radapi/index.js pi:/opt/node/radapi/index.js

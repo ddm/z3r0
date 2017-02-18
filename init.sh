@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-DIR=`dirname $0`
+pushd `dirname $0` > /dev/null
+DIR=`pwd -P`
+popd > /dev/null
 
 # Expected ~/.ssh/config:
 # Host pi
@@ -75,17 +77,10 @@ ssh pi << 'EOF'
   sudo python setup.py install
   echo "RadAPI..."
   git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
+  mkdir -p /opt/node/radapi/data/
   cd /opt/node/radapi
   npm install
-  mv node_modules/node-red-ddm node_modules/node-red
-  mv node_modules/node-red-node-swagger-ddm node_modules/node-red-node-swagger
-  cd /opt/node/radapi/node_modules/swagger-ui/
-  npm install
-  npm install -g bower
-  bower install
-  npm run build
   sudo chown -R pi:pi /opt/node/radapi
-  mkdir -p /opt/node/radapi/data/
 EOF
 
 echo "Configuring RadAPI..."

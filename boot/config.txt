@@ -5,3 +5,10 @@ dtparam=spi=on
 dtparam=audio=on
 dtoverlay=dwc2
 enable_uart=1
+
+hdmi_drive=2
+hdmi_safe=1
+#hdmi_mode=87
+#hdmi_cvt=940 540 60 3 0 0 0
+#hdmi_force_hotplug=1
+#config_hdmi_boost=4

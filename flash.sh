@@ -1,29 +1,46 @@
 #!/usr/bin/env bash
 
-DIR=`dirname $0`
-RASPBIAN_RELEASE="2016-11-29"
-RASPBIAN_VERSION="2016-11-25"
-if [ ! -f $DIR/$RASPBIAN_VERSION-raspbian-jessie-lite.img ]; then
-  if [ ! -f $DIR/$RASPBIAN_VERSION-raspbian-jessie-lite.zip ]; then
-    echo "Downloading Raspbian Jessie Lite..."
-    wget http://director.downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-$RASPBIAN_RELEASE/$RASPBIAN_VERSION-raspbian-jessie-lite.zip
-  fi
-  unzip $RASPBIAN_VERSION-raspbian-jessie-lite.zip
+RASPBIAN_DISTRO="raspbian"        # raspbian_lite
+RASPBIAN_FLAVOR="raspbian-jessie" # raspbian-jessie-lite
+RASPBIAN_RELEASE="2017-01-10"
+RASPBIAN_VERSION="2017-01-11"
+
+RASPBIAN_URL="http://downloads.raspberrypi.org/${RASPBIAN_DISTRO}/images/${RASPBIAN_DISTRO}-${RASPBIAN_RELEASE}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip"
+
+pushd `dirname $0` > /dev/null
+DIR=`pwd -P`
+popd > /dev/null
+
+if (( $# < 1 )) ; then
+    echo "Usage: $0 disk"
+    echo "  e.g. $0 disk2"
+    echo "Found:"
+    find /dev -name disk[0-9] 2> /dev/null | grep -v directory | cut -d '/' -f 3
+    exit 1
 fi
-RASPBIAN_SIZE=$(stat -x $RASPBIAN_VERSION-raspbian-jessie-lite.img | grep Size | cut -d ":" -f 2 | cut -d " " -f 2)
-echo "Image: $RASPBIAN_VERSION-raspbian-jessie-lite.img"
-echo "Size: $RASPBIAN_SIZE"
+TARGET=$1
 
-echo "Unmounting SD Card Volume /dev/disk2s1..."
-sudo diskutil unmount /dev/disk2s1
+if [ ! -f ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img ]; then
+  if [ ! -f ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip ]; then
+    echo "Downloading image..."
+    wget ${RASPBIAN_URL}
+  fi
+  unzip ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip
+fi
+RASPBIAN_SIZE=$(stat -x ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | grep Size | cut -d ":" -f 2 | cut -d " " -f 2)
+echo "Image: ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img"
+echo "Size: ${RASPBIAN_SIZE}"
 
-echo "Flashing SD Card (/dev/rdisk2)..."
-COMMAND="dd if=$DIR/$RASPBIAN_VERSION-raspbian-jessie-lite.img | pv -s $RASPBIAN_SIZE | dd bs=1m of=/dev/rdisk2"
-sudo sh -c "$COMMAND"
+echo "Unmounting SD Card Volume /dev/${TARGET}s1..."
+sudo diskutil unmount /dev/${TARGET}s1
+
+echo "Flashing SD Card (/dev/r${TARGET})..."
+COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | pv -s ${RASPBIAN_SIZE} | dd bs=1m of=/dev/r${TARGET}"
+sudo sh -c "${COMMAND}"
 sleep 5
 
-echo "Configuring RNDIS tethering..."
-cp $DIR/boot/* /Volumes/boot/
+echo "Configuring RNDIS tethering, HDMI and ssh..."
+cp ${DIR}/boot/* /Volumes/boot/
 
 echo "Ejecting SD Card..."
-sudo diskutil eject /dev/disk2
+sudo diskutil eject /dev/${TARGET}

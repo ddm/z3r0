@@ -7,6 +7,5 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 alias ll='ls -al'
-alias debug='tmuxinator start voltron'
 
 alias killopenocd='sudo kill -9 `ps -ef | grep openocd | grep sudo | grep -v grep | awk '"'"'{ print $2 }'"'"'`'

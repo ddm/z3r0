@@ -28,59 +28,34 @@ ssh pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/lo
 echo "Installing..."
 ssh pi << 'EOF'
   echo "Dependencies..."
-  sudo apt-get update
-  sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev picocom vim tmux ruby openjdk-8-jdk
-  sudo apt-get clean
-  echo "Tmuxinator..."
-  wget -O /home/pi/tmuxinator.bash https://raw.githubusercontent.com/tmuxinator/tmuxinator/master/completion/tmuxinator.bash
-  sudo gem install tmuxinator
-  mkdir -p /home/pi/.tmuxinator/ && mv /home/pi/voltron.yml /home/pi/.tmuxinator/
-  echo "OpenOCD..."
-  git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
-  cd /home/pi/openocd/
-  ./bootstrap
-  ./configure --enable-sysfsgpio --enable-bcm2835gpio
-  make
-  sudo make install
-  echo "Closure compiler..."
-  sudo mkdir -p /opt/closure-compiler/
-  sudo chown pi:pi /opt/closure-compiler/
-  cd /opt/closure-compiler/
-  rm -f /opt/closure-compiler/*
-  wget https://dl.google.com/closure-compiler/compiler-latest.zip
-  unzip compiler-latest.zip
-  rm compiler-latest.zip
-  CLOSURE_COMPILER_JAR="`readlink -f $(ls closure-compiler-*.jar)`"
-  CLOSURE_COMPILER_LINK="`dirname $CLOSURE_COMPILER_JAR`/closure-compiler.jar"
-  ln -s $CLOSURE_COMPILER_JAR $CLOSURE_COMPILER_LINK
+    sudo apt-get update
+    sudo apt-get upgrade -y
+    sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev picocom vim tmux
+    sudo apt-get clean
   echo "Node.js..."
-  export NODE_VERSION="v6.9.4"
-  sudo mkdir -p /opt/node/
-  sudo chown pi:pi /opt/node/
-  export NODE_PACKAGE="node-$NODE_VERSION-linux-armv6l"
-  curl -o /opt/node/$NODE_PACKAGE.tar.xz https://nodejs.org/dist/$NODE_VERSION/$NODE_PACKAGE.tar.xz
-  cd /opt/node/
-  tar xf $NODE_PACKAGE.tar.xz
-  rm /opt/node/$NODE_PACKAGE.tar.xz
-  ln -s /opt/node/$NODE_PACKAGE /opt/node/latest
-  export PATH="$PATH:/opt/node/latest/bin/"
-  echo "Volton..."
-  git clone https://github.com/snare/voltron /home/pi/voltron
-  cd /home/pi/voltron
-  ./install.sh
-  git clone https://github.com/snare/voltron-web.git /home/pi/voltron-web
-  cd /home/pi/voltron-web/voltron_web/static
-  npm install
-  npm install -g webpack
-  webpack
-  cd /home/pi/voltron-web
-  sudo python setup.py install
+    export NODE_VERSION="v7.5.0"
+    sudo mkdir -p /opt/node/
+    sudo chown pi:pi /opt/node/
+    export NODE_PACKAGE="node-$NODE_VERSION-linux-armv6l"
+    curl -o /opt/node/$NODE_PACKAGE.tar.xz https://nodejs.org/dist/$NODE_VERSION/$NODE_PACKAGE.tar.xz
+    cd /opt/node/
+    tar xf $NODE_PACKAGE.tar.xz
+    rm /opt/node/$NODE_PACKAGE.tar.xz
+    ln -s /opt/node/$NODE_PACKAGE /opt/node/latest
+    export PATH="/opt/node/latest/bin/:$PATH"
   echo "RadAPI..."
-  git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
-  mkdir -p /opt/node/radapi/data/
-  cd /opt/node/radapi
-  npm install
-  sudo chown -R pi:pi /opt/node/radapi
+    git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
+    mkdir -p /opt/node/radapi/data/
+    cd /opt/node/radapi
+    npm install
+    sudo chown -R pi:pi /opt/node/radapi
+  echo "OpenOCD..."
+    git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
+    cd /home/pi/openocd/
+    ./bootstrap
+    ./configure --enable-sysfsgpio --enable-bcm2835gpio
+    make
+    sudo make install
 EOF
 
 echo "Configuring RadAPI..."

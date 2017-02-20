@@ -61,5 +61,4 @@ if ! shopt -oq posix; then
 fi
 
 export EDITOR='vim'
-export PATH="$PATH:/opt/node/latest/bin/"
-source $HOME/tmuxinator.bash
+export PATH="/opt/node/latest/bin/:$PATH"

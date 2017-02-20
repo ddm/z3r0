@@ -35,7 +35,12 @@ echo "Unmounting SD Card Volume /dev/${TARGET}s1..."
 sudo diskutil unmount /dev/${TARGET}s1
 
 echo "Flashing SD Card (/dev/r${TARGET})..."
-COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | pv -s ${RASPBIAN_SIZE} | dd bs=1m of=/dev/r${TARGET}"
+if hash pv 2>/dev/null; then
+  COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | pv -s ${RASPBIAN_SIZE} | dd of=/dev/r${TARGET}" bs=1m
+else
+  COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img of=/dev/r${TARGET}" bs=1m
+fi
+
 sudo sh -c "${COMMAND}"
 sleep 5
 

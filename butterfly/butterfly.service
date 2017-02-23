@@ -1,0 +1,15 @@
+[Unit]
+Description=Butterfly
+
+[Service]
+ExecStart=/usr/local/bin/butterfly.server.py --host=raspberrypi.local --unsecure
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=butterfly
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target

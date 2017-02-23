@@ -75,11 +75,21 @@
                             description: "Node-RED",
                             url: `//${window.location.hostname}:1880/edit`,
                             sandbox: "allow-same-origin allow-scripts"
+                        },
+                        {
+                            description: "Jupyter",
+                            url: `//${window.location.hostname}:8888/`,
+                            sandbox: "allow-same-origin allow-scripts"
+                        },
+                        {
+                            description: "Butterfly",
+                            url: `//${window.location.hostname}:57575/`,
+                            sandbox: "allow-same-origin allow-scripts"
                         }
                     ]
                 }
             },
-            ready: () => { console.log("Ready!") }
+            ready: () => { console.log("Ready!"); }
         });
     </script>
     <template is="dom-bind">

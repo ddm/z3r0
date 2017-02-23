@@ -29,9 +29,12 @@ echo "Installing..."
 ssh pi << 'EOF'
   echo "Dependencies..."
     sudo apt-get update
-    sudo apt-get upgrade -y
-    sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev picocom vim tmux
+    sudo apt-get dist-upgrade -y
+    sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev libffi-dev libssl-dev python-dev picocom vim tmux
+    sudo apt-get autoremove --purge
     sudo apt-get clean
+    wget https://bootstrap.pypa.io/get-pip.py
+    sudo python get-pip.py
   echo "Node.js..."
     export NODE_VERSION="v7.5.0"
     sudo mkdir -p /opt/node/
@@ -47,8 +50,18 @@ ssh pi << 'EOF'
     git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
     mkdir -p /opt/node/radapi/data/
     cd /opt/node/radapi
-    npm install
+    npm install || echo ""
     sudo chown -R pi:pi /opt/node/radapi
+  echo "Jupyter..."
+    sudo pip install requests notebook
+    mkdir -p $HOME/notebooks/
+    # enable in iframes
+    sudo sed -i "s/\"frame-ancestors 'self'\",//g" /usr/local/lib/python$(python --version 2>&1 | egrep -o '2\.[0-9]+')/dist-packages/notebook/base/handlers.py
+  echo "Butterfy..."
+    sudo pip install butterfly
+    # suppress warnings on close
+    sudo sed -i "s/beforeunload/beforeunload_disabled/g" /usr/local/lib/python$(python --version 2>&1 | egrep -o '2\.[0-9]+')/dist-packages/butterfly/static/ext.min.js
+    sudo sed -i "s/beforeunload/beforeunload_disabled/g" /usr/local/lib/python$(python --version 2>&1 | egrep -o '2\.[0-9]+')/dist-packages/butterfly/static/main.min.js
   echo "OpenOCD..."
     git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
     cd /home/pi/openocd/
@@ -59,14 +72,30 @@ ssh pi << 'EOF'
 EOF
 
 echo "Configuring RadAPI..."
-scp $DIR/swagger-ui/swagger-ui.html pi:/opt/node/radapi/node_modules/node-red-node-swagger/swagger/swagger-ui/
+scp $DIR/radapi/data/*   pi:/opt/node/radapi/data/
 scp $DIR/radapi/public/* pi:/opt/node/radapi/public/
-scp $DIR/radapi/data/* pi:/opt/node/radapi/data/
 scp $DIR/radapi/index.js pi:/opt/node/radapi/index.js
 scp $DIR/radapi/radapi.service pi:
 ssh pi << 'EOF'
   sudo chown root:root /home/pi/radapi.service
   sudo mv /home/pi/radapi.service /etc/systemd/system/
   sudo systemctl enable radapi.service
+EOF
+
+echo "Configuring Jupyter..."
+scp $DIR/notebook/*.ipynb pi:/home/pi/notebooks/
+scp $DIR/notebook/notebook.service pi:
+ssh pi << 'EOF'
+  sudo chown root:root /home/pi/notebook.service
+  sudo mv /home/pi/notebook.service /etc/systemd/system/
+  sudo systemctl enable notebook.service
+EOF
+
+echo "Configuring Butterfly..."
+scp $DIR/butterfly/butterfly.service pi:
+ssh pi << 'EOF'
+  sudo chown root:root /home/pi/butterfly.service
+  sudo mv /home/pi/butterfly.service /etc/systemd/system/
+  sudo systemctl enable butterfly.service
   sudo reboot
 EOF

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-RASPBIAN_DISTRO="raspbian"        # raspbian_lite
-RASPBIAN_FLAVOR="raspbian-jessie" # raspbian-jessie-lite
+RASPBIAN_DISTRO="raspbian"        # || raspbian_lite
+RASPBIAN_FLAVOR="raspbian-jessie" # || raspbian-jessie-lite
 RASPBIAN_RELEASE="2017-01-10"
 RASPBIAN_VERSION="2017-01-11"
 
@@ -36,9 +36,9 @@ sudo diskutil unmount /dev/${TARGET}s1
 
 echo "Flashing SD Card (/dev/r${TARGET})..."
 if hash pv 2>/dev/null; then
-  COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | pv -s ${RASPBIAN_SIZE} | dd of=/dev/r${TARGET}" bs=1m
+  COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | pv -s ${RASPBIAN_SIZE} | dd of=/dev/r${TARGET} bs=1m"
 else
-  COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img of=/dev/r${TARGET}" bs=1m
+  COMMAND="dd if=${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img of=/dev/r${TARGET} bs=1m"
 fi
 
 sudo sh -c "${COMMAND}"

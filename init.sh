@@ -16,27 +16,30 @@ popd > /dev/null
 PUBLIC_KEY=$(cat $HOME/.ssh/pi.pub)
 
 echo "Waiting for Raspberry Pi..."
-while ! ping -c1 raspberrypi.local &>/dev/null; do :; done # Wait for network
-sleep 10 # Wait for ssh
+  while ! ping -c1 raspberrypi.local &>/dev/null; do :; done # Wait for network
+  sleep 15 # Wait for ssh
 
 echo "Bootstraping..."
-ssh pi "mkdir -p ~/.ssh && echo $PUBLIC_KEY > .ssh/authorized_keys"
-scp ./home/* pi:
-scp ./home/.* pi:
-ssh pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen"
+  ssh pi "mkdir -p ~/.ssh && echo $PUBLIC_KEY > .ssh/authorized_keys"
+  scp ./home/* pi:
+  scp ./home/.* pi:
+  ssh pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen"
 
 echo "Installing..."
 ssh pi << 'EOF'
   echo "Dependencies..."
     sudo apt-get update
-    sudo apt-get dist-upgrade -y
-    sudo apt-get install -y git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev libffi-dev libssl-dev python-dev picocom vim tmux
-    sudo apt-get autoremove --purge
-    sudo apt-get clean
+    sudo apt-get -y --force-yes dist-upgrade
+    sudo apt-get -y --force-yes install git build-essential autoconf automake libtool pkg-config libusb-1.0 libusb-dev libftdi-dev libffi-dev libssl-dev python-dev picocom vim tmux
+    sudo apt-get autoremove -y --purge
+    sudo apt-get -y clean
+    rm get-pip.*
     wget https://bootstrap.pypa.io/get-pip.py
     sudo python get-pip.py
+    PYTHON2_PACKAGES_DIR="/usr/local/lib/python$(python --version 2>&1 | egrep -o '2\.[0-9]+')/dist-packages"
+
   echo "Node.js..."
-    export NODE_VERSION="v7.5.0"
+    export NODE_VERSION="v7.6.0"
     sudo mkdir -p /opt/node/
     sudo chown pi:pi /opt/node/
     export NODE_PACKAGE="node-$NODE_VERSION-linux-armv6l"
@@ -44,25 +47,35 @@ ssh pi << 'EOF'
     cd /opt/node/
     tar xf $NODE_PACKAGE.tar.xz
     rm /opt/node/$NODE_PACKAGE.tar.xz
+    rm /opt/node/latest
     ln -s /opt/node/$NODE_PACKAGE /opt/node/latest
-    export PATH="/opt/node/latest/bin/:$PATH"
+    echo "$PATH" | grep -q 'node' || export PATH="/opt/node/latest/bin/:$PATH"
+
   echo "RadAPI..."
+    rm -rf /opt/node/radapi
     git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
     mkdir -p /opt/node/radapi/data/
     cd /opt/node/radapi
-    npm install || echo ""
-    sudo chown -R pi:pi /opt/node/radapi
+    npm install express node-red node-red-node-swagger underscore async
+    npm install -g bower
+    bower install
+
   echo "Jupyter..."
-    sudo pip install requests notebook
+    sudo pip install -U requests notebook
     mkdir -p $HOME/notebooks/
     # enable in iframes
-    sudo sed -i "s/\"frame-ancestors 'self'\",//g" /usr/local/lib/python$(python --version 2>&1 | egrep -o '2\.[0-9]+')/dist-packages/notebook/base/handlers.py
+    sudo sed -i "s/\"frame-ancestors 'self'\",//g" $PYTHON2_PACKAGES_DIR/notebook/base/handlers.py
+
   echo "Butterfy..."
-    sudo pip install butterfly
+    sudo pip install -U butterfly
     # suppress warnings on close
-    sudo sed -i "s/beforeunload/beforeunload_disabled/g" /usr/local/lib/python$(python --version 2>&1 | egrep -o '2\.[0-9]+')/dist-packages/butterfly/static/ext.min.js
-    sudo sed -i "s/beforeunload/beforeunload_disabled/g" /usr/local/lib/python$(python --version 2>&1 | egrep -o '2\.[0-9]+')/dist-packages/butterfly/static/main.min.js
+    EVENT_REPLACE="s/beforeunload[^_]/beforeunload_disabled/g"
+    JS_ASSEST_DIR="$PYTHON2_PACKAGES_DIR/butterfly/static"
+    sudo sed -i "$EVENT_REPLACE" $JS_ASSEST_DIR/ext.min.js
+    sudo sed -i "$EVENT_REPLACE" $JS_ASSEST_DIR/main.min.js
+
   echo "OpenOCD..."
+    rm -rf /home/pi/openocd
     git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
     cd /home/pi/openocd/
     ./bootstrap
@@ -71,28 +84,28 @@ ssh pi << 'EOF'
     sudo make install
 EOF
 
-echo "Configuring RadAPI..."
-scp $DIR/radapi/data/*   pi:/opt/node/radapi/data/
-scp $DIR/radapi/public/* pi:/opt/node/radapi/public/
-scp $DIR/radapi/index.js pi:/opt/node/radapi/index.js
-scp $DIR/radapi/radapi.service pi:
+echo "RadAPI..."
+  scp $DIR/radapi/data/*   pi:/opt/node/radapi/data/
+  scp $DIR/radapi/public/* pi:/opt/node/radapi/public/
+  scp $DIR/radapi/index.js pi:/opt/node/radapi/index.js
+  scp $DIR/radapi/radapi.service pi:
 ssh pi << 'EOF'
   sudo chown root:root /home/pi/radapi.service
   sudo mv /home/pi/radapi.service /etc/systemd/system/
   sudo systemctl enable radapi.service
 EOF
 
-echo "Configuring Jupyter..."
-scp $DIR/notebook/*.ipynb pi:/home/pi/notebooks/
-scp $DIR/notebook/notebook.service pi:
+echo "Jupyter..."
+  scp $DIR/notebook/*.ipynb pi:/home/pi/notebooks/
+  scp $DIR/notebook/notebook.service pi:
 ssh pi << 'EOF'
   sudo chown root:root /home/pi/notebook.service
   sudo mv /home/pi/notebook.service /etc/systemd/system/
   sudo systemctl enable notebook.service
 EOF
 
-echo "Configuring Butterfly..."
-scp $DIR/butterfly/butterfly.service pi:
+echo "Configuring..."
+  scp $DIR/butterfly/butterfly.service pi:
 ssh pi << 'EOF'
   sudo chown root:root /home/pi/butterfly.service
   sudo mv /home/pi/butterfly.service /etc/systemd/system/

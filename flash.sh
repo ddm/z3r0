@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-RASPBIAN_DISTRO="raspbian"        # || raspbian_lite
-RASPBIAN_FLAVOR="raspbian-jessie" # || raspbian-jessie-lite
+RASPBIAN_DISTRO="raspbian_lite"        # || raspbian_lite
+RASPBIAN_FLAVOR="raspbian-jessie-lite" # || raspbian-jessie-lite
 RASPBIAN_RELEASE="2017-01-10"
 RASPBIAN_VERSION="2017-01-11"
 
@@ -27,7 +27,7 @@ if [ ! -f ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img ]; then
   fi
   unzip ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip
 fi
-RASPBIAN_SIZE=$(stat -x ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | grep Size | cut -d ":" -f 2 | cut -d " " -f 2)
+RASPBIAN_SIZE=$(stat -x ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | grep Size | cut -d ':' -f 2 | cut -d ' ' -f 2)
 echo "Image: ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img"
 echo "Size: ${RASPBIAN_SIZE}"
 

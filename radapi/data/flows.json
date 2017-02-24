@@ -155,6 +155,35 @@
         "deprecated": false
     },
     {
+        "id": "c2edd4bd.406af8",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "Restart a z3r0 service",
+        "description": "",
+        "tags": "Ops",
+        "consumes": "",
+        "produces": "",
+        "parameters": [
+            {
+                "name": "service",
+                "in": "path",
+                "description": "Service name",
+                "required": true,
+                "type": "string",
+                "enum": [
+                    "butterfly",
+                    "notepad"
+                ]
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "OK"
+            }
+        },
+        "deprecated": false
+    },
+    {
         "id": "b226f9aa.19ac38",
         "type": "http in",
         "z": "a39a4057.2994",
@@ -647,5 +676,62 @@
         "x": 698,
         "y": 178,
         "wires": []
+    },
+    {
+        "id": "70bb0be6.f0a034",
+        "type": "http in",
+        "z": "2aca2241.addfbe",
+        "name": "",
+        "url": "/restart/:service",
+        "method": "post",
+        "swaggerDoc": "c2edd4bd.406af8",
+        "x": 151,
+        "y": 226.20000648498535,
+        "wires": [
+            [
+                "ed92d208.8d6cf"
+            ]
+        ]
+    },
+    {
+        "id": "4de153f9.f7c2fc",
+        "type": "exec",
+        "z": "2aca2241.addfbe",
+        "command": "sudo systemctl restart ",
+        "addpay": true,
+        "append": "",
+        "useSpawn": "",
+        "timer": "",
+        "name": "",
+        "x": 205.70000457763672,
+        "y": 412.1000099182129,
+        "wires": [
+            [
+                "b43f7523.6fe2c8",
+                "dc83b440.ca6d48"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ],
+            [
+                "b43f7523.6fe2c8"
+            ]
+        ]
+    },
+    {
+        "id": "ed92d208.8d6cf",
+        "type": "function",
+        "z": "2aca2241.addfbe",
+        "name": "",
+        "func": "let service = msg.req.params.service;\nmsg.payload = service === \"butterfly\" ? \"butterfly\"\n            : msg.service === \"notepad\" ? \"notepad\"\n            : \"unknown_service\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 170.5,
+        "y": 323.8000183105469,
+        "wires": [
+            [
+                "4de153f9.f7c2fc"
+            ]
+        ]
     }
 ]

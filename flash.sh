@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-RASPBIAN_DISTRO="raspbian_lite"        # || raspbian_lite
-RASPBIAN_FLAVOR="raspbian-jessie-lite" # || raspbian-jessie-lite
+RASPBIAN_DISTRO="raspbian_lite"        # || raspbian
+RASPBIAN_FLAVOR="raspbian-jessie-lite" # || raspbian-jessie
 RASPBIAN_RELEASE="2017-01-10"
 RASPBIAN_VERSION="2017-01-11"
 
@@ -12,7 +12,7 @@ DIR=`pwd -P`
 popd > /dev/null
 
 if (( $# < 1 )) ; then
-    echo "Usage: $0 disk"
+    echo "Usage: $0 [disk]"
     echo "  e.g. $0 disk2"
     echo "Found:"
     find /dev -name disk[0-9] 2> /dev/null | grep -v directory | cut -d '/' -f 3

@@ -62,4 +62,4 @@ fi
 
 export EDITOR='vim'
 export PATH="/opt/node/latest/bin/:$PATH"
-export KISYSMOD="/opt/pcb/kicad-library"
+export KISYSMOD="/opt/pcb/kicad-library/modules"

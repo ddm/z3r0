@@ -2,10 +2,10 @@
 
 RASPBIAN_DISTRO="raspbian_lite"        # || raspbian
 RASPBIAN_FLAVOR="raspbian-jessie-lite" # || raspbian-jessie
-RASPBIAN_RELEASE="2017-01-10"
-RASPBIAN_VERSION="2017-01-11"
+RASPBIAN_RELEASE="2017-03-03"
+RASPBIAN_VERSION="2017-03-02"
 
-RASPBIAN_URL="http://downloads.raspberrypi.org/${RASPBIAN_DISTRO}/images/${RASPBIAN_DISTRO}-${RASPBIAN_RELEASE}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip"
+RASPBIAN_URL="http://director.downloads.raspberrypi.org/${RASPBIAN_DISTRO}/images/${RASPBIAN_DISTRO}-${RASPBIAN_RELEASE}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip"
 
 pushd `dirname $0` > /dev/null
 DIR=`pwd -P`

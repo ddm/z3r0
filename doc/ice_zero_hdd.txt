@@ -1,0 +1,213 @@
+https://www.dropbox.com/s/gwxz4o7gqaksnoy/ice_zero_hdd.txt?dl=0
+
+                       IceZero Hardware Design Document
+                     (c) Copyright 2017 Kevin M. Hubbard
+                              Black Mesa Labs
+                                2017.02.11
+                          
+[ Description ]
+  The IceZero is a Lattice ICE40HX4K FPGA board designed to interface with a
+  Raspberry Pi 2x20 0.100" Header. The RaspberryPi may be used to power the
+  IceZero board from the 5V rail. GPIO pins of the RaspberryPi are used along
+  with the ice_zero_prog.py program to configure the FPGA SPI PROM. Three 
+  digital interfaces (SPI,UART,I2C) are routed from the Pi and may be used to
+  communicate with the FPGA, or optionally route out to external PMOD and FTDI
+  connectors on the board. The IceZero does not require a RaspberryPi for 
+  operation. 0.050" pitch pads on the back side of the board may be used with
+  pogopins and a Lattice HW-USBN-2B JTAG programmer for optionally programming
+  the PROM without a RaspberryPi. This configuration supports very thin board
+  assemblies without the 2x20" Pi header. Once an initial design is loaded 
+  into the PROM via JTAG, the FTDI header may be used to update new firmware 
+  over a USB link to a PC.
+
+[ Power Supply ]
+  Three Linear Regulators on the IceZero regulate 5V down to 3.3V and 1.2V.
+  Each regulator has a 200mA limit. A pair of 3.3V and 1.2V regulators are 
+  dedicated for all on board components ( FPGA,SRAM,PROM,OSC ) and an isolated
+  3.3V regulator is dedicated for all PMOD connectors. A single 5V rail on the
+  board connects to the RaspberryPi 2x20 5V, the FTDI 5V and also a 1x2 0.100"
+  power header connector. Care must be taken if using both a RaspberyPi and 
+  FTDI cable simultaneously so that multiple 5V supplies connected together 
+  do not result in electrical problems.
+
+[ Block Diagram ]
+                      ---------------------------------
+                     |           RaspPi 2x20           |
+                      ---------------------------------
+                        ^     ^      ^           ^
+                        | SPI | UART | I2C       | GPIO
+                        v     v      v           v
+                      -----------------      ----------
+     PMOD P1 2x6 <-->|                 |<-->| SPI PROM |
+     PMOD P2 2x6 <-->|                 |     ----------
+     PMOD P3 1x6 <-->|      FPGA       |     ----------
+     PMOD P4 1x6 <-->|                 |<-->|    SRAM  |
+     FTDI    1x6 <-->|                 |     ---------- 
+     POWER   1x2 <-->|                 |     ----------
+                     |                 |<---|  100 MHz |
+                      -----------------      ----------
+
+[ User IO ]
+  24 LVCMOS 3.3V I/O pins are directly accessible via the 4 PMOD connectors.
+  These and all other I/O pins of the FPGA are 3.3V only and are NOT 5V 
+  tolerant. Applying a 5V signal to anything other than the 5V power inputs
+  will permanently damage components on the IceZero board.
+
+[ Mesa Bus Protocol over FTDI ]
+  The FTDI connector supports Mesa Bus Protocol daisy chaining via the Wi,Wo,
+  Ri,Ro signals. Please see documentation on Mesa Bus Protocol on how up to
+  250 IceZeros may be daisy chain interconnected via the FTDI connector.
+
+[ Connector Pinouts ]
+  [[ PMOD Female Right Angle 2x6 0.100" - facing into connector ]]
+            ----------------------------
+           | 3V GND D[7] D[5] D[3] D[1] |
+           | 3V GND D[6] D[4] D[2] D[0] |
+         ---------------------------------
+        |             FR4                 |
+         ---------------------------------
+
+  [[ PMOD Female Right Angle 1x6 0.100" - facing into connector ]]
+            ----------------------------
+           | 3V GND D[3] D[2] D[1] D[0] |
+         ---------------------------------
+        |             FR4                 |
+         ---------------------------------
+
+  [[ FTDI Straight 1x6 0.100" Male - facing into connector ]]
+          --------------------
+         | GND Wo 5V Wi Ro Ri |
+          --------------------
+           BLK            GRN
+
+[ FPGA Pinout ]
+  sram_a[9]     2  -pullup yes #[22]
+  sram_a[8]     3  -pullup yes #[21]
+  sram_a[7]     4  -pullup yes #[20]
+  rsvd[0]       7  -pullup yes
+  rsvd[1]       8  -pullup yes
+  sram_a[6]     9  -pullup yes #[19]
+  sram_a[5]    10  -pullup yes #[18]
+  sram_we_l    11  -pullup yes #[17]
+  sram_d[7]    12  -pullup yes #[16]
+  sram_d[6]    15  -pullup yes #[15]
+  sram_d[5]    16  -pullup yes #[14]
+  sram_d[4]    17  -pullup yes #[13]
+  sram_d[3]    18  -pullup yes #[10]
+  sram_d[2]    19  -pullup yes #[9]
+  sram_d[1]    22  -pullup yes #[8]
+  sram_d[0]    23  -pullup yes #[7]
+  sram_ce_l    24  -pullup yes #[6]
+  sram_a[4]    25  -pullup yes #[5]
+  rsvd[2]      26  -pullup yes
+  rsvd[3]      28  -pullup yes
+  rsvd[4]      29  -pullup yes
+  sram_a[3]    31  -pullup yes #[4]
+  sram_a[2]    32  -pullup yes #[3]
+  sram_a[1]    33  -pullup yes #[2]
+  sram_a[0]    34  -pullup yes #[1]
+  tbd[0]       35  -pullup yes
+  tbd[1]       36  -pullup yes
+  clk_100m     49  -pullup yes
+  tbd[2]       50  -pullup yes
+  tbd[3]       51  -pullup yes
+  tbd[4]       52  -pullup yes
+  tbd[5]       58  -pullup yes
+  sram_a[16]   60  -pullup yes #[43]
+  sram_a[17]   61  -pullup yes #[44]
+  sram_a[15]   62  -pullup yes #[42]
+  cbsel[0]     63  -pullup yes
+  cbsel[1]     64  -pullup yes
+  # cfg_done     65
+  # cfg_rst_l    66
+  cfg_so       67
+  cfg_si       68
+  cfg_sck      70
+  cfg_ss       71
+  tbd[6]       72  -pullup yes
+  pi_id[0]     73  -pullup yes
+  pi_id[1]     74  -pullup yes
+  sram_ub_l    75  -pullup yes #[42]
+  sram_oe_l    76  -pullup yes #[41]
+  tbd[7]       77  -pullup yes
+  pi_spi_ce[1] 78  -pullup yes
+  pi_spi_sck   79  -pullup yes
+  sram_d[15]   80  -pullup yes #[38]
+  sram_lb_l    81  -pullup yes #[39]
+  sram_d[13]   82  -pullup yes #[36]
+  sram_d[14]   83  -pullup yes #[37]
+  sram_d[12]   84  -pullup yes #[35]
+  pi_spi_ce[0] 85  -pullup yes
+  pi_spi_miso  87  -pullup yes
+  pi_gpio[0]   88  -pullup yes
+  pi_spi_mosi  90  -pullup yes
+  sram_d[11]   91  -pullup yes #[32]
+  tbd[8]       93  -pullup yes
+  tbd[9]       94  -pullup yes
+  sram_d[10]   95  -pullup yes #[31]
+  sram_d[9]    96  -pullup yes #[30]
+  sram_d[8]    97  -pullup yes #[29]
+  sram_a[18]   98  -pullup yes #[28]
+  pi_gpio[1]   99  -pullup yes
+  pi_gpio[2]   101 -pullup yes
+  sram_a[14]   102 -pullup yes #[27]
+  sram_a[13]   104 -pullup yes #[26]
+  sram_a[12]   105 -pullup yes #[25]
+  sram_a[11]   106 -pullup yes #[24]
+  sram_a[10]   107 -pullup yes #[23]
+  ok_led       110 -pullup yes
+  pi_uart_ro   112 -pullup yes
+  pi_uart_wi   113 -pullup yes
+  pi_i2c_scl   114 -pullup yes
+  pi_i2c_sda   115 -pullup yes
+  xtra_a[2]    116 -pullup yes
+  xtra_a[3]    117 -pullup yes
+  xtra_a[4]    118 -pullup yes
+  ftdi_wo      119 -pullup yes
+  xtra_a[0]    120 -pullup yes
+  xtra_a[1]    121 -pullup yes
+  ftdi_wi      122 -pullup yes
+  ftdi_ro      124 -pullup yes
+  ftdi_ri      125 -pullup yes
+  j0_l         128 -pullup yes # Input Only Clock Capable
+  j1_l         129 -pullup yes # Input Only Clock Capable
+  # PMOD P1  
+  gpio_pin[0]  141  -pullup yes
+  gpio_pin[1]  139  -pullup yes
+  gpio_pin[2]  138  -pullup yes
+  gpio_pin[3]  137  -pullup yes
+  gpio_pin[4]  136  -pullup yes
+  gpio_pin[5]  135 -pullup yes
+  gpio_pin[6]  134 -pullup yes
+  gpio_pin[7]  130 -pullup yes
+  # PMOD P2  
+  gpio_pin[8]  55  -pullup yes
+  gpio_pin[9]  56  -pullup yes
+  gpio_pin[10] 47  -pullup yes
+  gpio_pin[11] 48  -pullup yes
+  gpio_pin[12] 44  -pullup yes
+  gpio_pin[13] 45  -pullup yes
+  gpio_pin[14] 42  -pullup yes
+  gpio_pin[15] 43  -pullup yes
+  # PMOD P3  
+  gpio_pin[16] 41  -pullup yes
+  gpio_pin[17] 39  -pullup yes
+  gpio_pin[18] 38  -pullup yes
+  gpio_pin[19] 37  -pullup yes
+  # PMOD P4  
+  gpio_pin[20]  1  -pullup yes
+  gpio_pin[21] 144  -pullup yes
+  gpio_pin[22] 143  -pullup yes
+  gpio_pin[23] 142  -pullup yes
+  
+  
+[ License ]
+   This project is licensed with the CERN Open Hardware Licence    
+   v1.2.  You may redistribute and modify this project under the   
+   terms of the CERN OHL v.1.2. (http://ohwr.org/cernohl).         
+   This project is distributed WITHOUT ANY EXPRESS OR IMPLIED      
+   WARRANTY, INCLUDING OF MERCHANTABILITY, SATISFACTORY QUALITY    
+   AND FITNESS FOR A PARTICULAR PURPOSE. Please see the CERN OHL   
+   v.1.2 for applicable Conditions.                           
+
+[ EOF ]

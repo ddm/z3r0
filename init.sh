@@ -46,7 +46,7 @@ ssh pi << 'EOF'
   echo "┌───────────┐"
   echo "│ Butterfly │"
   echo "└───────────┘"
-    sudo pip install -U butterfly
+    sudo pip install -U butterfly==2.0.2
     # suppress warnings on close
     EVENT_REPLACE="s/beforeunload\"/beforeunload_disabled\"/g"
     JS_ASSEST_DIR="$PYTHON2_PACKAGES_DIR/butterfly/static"
@@ -56,7 +56,7 @@ ssh pi << 'EOF'
   echo "┌─────────┐"
   echo "│ Node.js │"
   echo "└─────────┘"
-    NODE_VERSION="v7.7.1"
+    NODE_VERSION="v7.8.0"
     sudo mkdir -p /opt/node/ && sudo chown pi:pi /opt/node/
     NODE_PACKAGE="node-$NODE_VERSION-linux-armv6l"
     curl -o /opt/node/$NODE_PACKAGE.tar.xz https://nodejs.org/dist/$NODE_VERSION/$NODE_PACKAGE.tar.xz

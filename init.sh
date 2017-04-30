@@ -54,11 +54,11 @@ ssh pi << 'EOF'
       tmux
     sudo apt-get autoremove -y --purge
     sudo apt-get -y clean
-    rm get-pip.*
     wget https://bootstrap.pypa.io/get-pip.py
     sudo python get-pip.py
     PYTHON2_VERSION=$(python --version 2>&1 | egrep -o '2\.[0-9]+')
     PYTHON2_PACKAGES_DIR="/usr/local/lib/python$PYTHON2_VERSION/dist-packages"
+    rm get-pip.py
 
   echo "┌───────────┐"
   echo "│ Butterfly │"

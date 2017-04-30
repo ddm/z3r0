@@ -34,7 +34,24 @@ ssh pi << 'EOF'
   echo "Dependencies..."
     sudo apt-get update
     sudo apt-get -y --force-yes dist-upgrade
-    sudo apt-get -y --force-yes install git build-essential autoconf automake libtool pkg-config libusb-dev libftdi-dev libffi-dev libssl-dev python-dev libxslt1-dev libxml2-dev python3-dev picocom vim tmux
+    sudo apt-get -y --force-yes install \
+      git \
+      build-essential \
+      autoconf \
+      automake \
+      libtool \
+      pkg-config \
+      libusb-1.0-0-dev\
+      libftdi-dev \
+      libffi-dev \
+      libssl-dev \
+      python-dev \
+      libxslt1-dev \
+      libxml2-dev \
+      python3-dev \
+      picocom \
+      vim \
+      tmux
     sudo apt-get autoremove -y --purge
     sudo apt-get -y clean
     rm get-pip.*
@@ -66,7 +83,17 @@ ssh pi << 'EOF'
     rm /opt/node/$NODE_PACKAGE.tar.xz
     rm /opt/node/latest
     ln -s /opt/node/$NODE_PACKAGE /opt/node/latest
-    echo "$PATH" | grep -q 'node' || export PATH="/opt/node/latest/bin/:$PATH"
+    sudo ln -s /opt/node/latest/bin/node /usr/local/bin/node
+    sudo ln -s /opt/node/latest/bin/npm /usr/local/bin/npm
+
+  echo "┌────────┐"
+  echo "│ Cloud9 │"
+  echo "└────────┘"
+    sudo pip install -U ikpdb
+    git clone --depth 1 --branch docker https://github.com/ddm/core.git /home/pi/.c9/
+    cd /home/pi/.c9/
+    find -path node_modules -prune -type d -print0 | xargs -t -I {} cd {} && npm install
+    npm install
 
   echo "┌────────┐"
   echo "│ RadAPI │"
@@ -163,8 +190,10 @@ ssh pi << 'EOF'
   sudo mv /home/pi/radapi.service /etc/systemd/system/
   sudo mv /home/pi/notebook.service /etc/systemd/system/
   sudo mv /home/pi/butterfly.service /etc/systemd/system/
+  sudo mv /home/pi/c9.service /etc/systemd/system/
   sudo systemctl enable radapi.service
   sudo systemctl enable notebook.service
   sudo systemctl enable butterfly.service
+  sudo systemctl enable c9.service
   sudo reboot
 EOF

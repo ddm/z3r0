@@ -33,8 +33,9 @@ echo "Installing..."
 ssh pi << 'EOF'
   echo "Dependencies..."
     sudo apt-get update
-    sudo apt-get -y --force-yes dist-upgrade
-    sudo apt-get -y --force-yes install \
+    DEBIAN_FRONTEND=noninteractive sudo apt-get -y --force-yes dist-upgrade
+    DEBIAN_FRONTEND=noninteractive sudo apt-get -y --force-yes install \
+      ca-certificates \
       git \
       build-essential \
       autoconf \
@@ -73,105 +74,120 @@ ssh pi << 'EOF'
   echo "┌─────────┐"
   echo "│ Node.js │"
   echo "└─────────┘"
-    NODE_VERSION="v7.8.0"
-    sudo mkdir -p /opt/node/ && sudo chown pi:pi /opt/node/
+    NODE_VERSION="v6.10.2"
     NODE_PACKAGE="node-$NODE_VERSION-linux-armv6l"
-    curl -o /opt/node/$NODE_PACKAGE.tar.xz https://nodejs.org/dist/$NODE_VERSION/$NODE_PACKAGE.tar.xz
-    cd /opt/node/
-    rm -rf /opt/node/$NODE_PACKAGE
-    tar xf $NODE_PACKAGE.tar.xz
-    rm /opt/node/$NODE_PACKAGE.tar.xz
-    rm /opt/node/latest
-    ln -s /opt/node/$NODE_PACKAGE /opt/node/latest
-    sudo ln -s /opt/node/latest/bin/node /usr/local/bin/node
-    sudo ln -s /opt/node/latest/bin/npm /usr/local/bin/npm
+    rm -rf /tmp/node
+    mkdir -p /tmp/node
+    curl -o /tmp/node/$NODE_PACKAGE.tar.xz https://nodejs.org/dist/$NODE_VERSION/$NODE_PACKAGE.tar.xz
+    cd /tmp/node
+    rm /tmp/node/$NODE_PACKAGE
+    tar xvf $NODE_PACKAGE.tar.xz
+    sudo rm -rf /opt/node
+    sudo mv /tmp/node/$NODE_PACKAGE /opt/node
+    sudo ln -sf /opt/node/bin/node /usr/local/bin/node
+    sudo ln -sf /opt/node/bin/npm /usr/local/bin/npm
+    rm -rf /tmp/node
+    npm install -g bower
+    sudo ln -sf /opt/node/bin/bower /usr/local/bin/bower
 
   echo "┌────────┐"
   echo "│ Cloud9 │"
   echo "└────────┘"
-    sudo pip install -U ikpdb
-    git clone --depth 1 --branch docker https://github.com/ddm/core.git /home/pi/.c9/
-    cd /home/pi/.c9/
+    rm -rf /home/pi/.c9/node_modules
+    if [ ! -d /home/pi/.c9 ]; then
+      git clone --depth 1 --branch docker https://github.com/ddm/core.git /home/pi/.c9
+      cd /home/pi/.c9
+    else
+      cd /home/pi/.c9
+      git reset HEAD --hard && git pull origin docker
+    fi
     find -path node_modules -prune -type d -print0 | xargs -t -I {} cd {} && npm install
+    cd /home/pi/.c9
+    npm install https://github.com/ddm/pty.js.git
     npm install
+    sudo pip install -U ikpdb
 
   echo "┌────────┐"
   echo "│ RadAPI │"
   echo "└────────┘"
-    if [ ! -d /opt/node/radapi ]; then
-      git clone --depth 1 https://github.com/ddm/radapi /opt/node/radapi
-      cd /opt/node/radapi
+    if [ ! -d /home/pi/radapi ]; then
+      git clone --depth 1 https://github.com/ddm/radapi /home/pi/radapi
+      cd /home/pi/radapi
     else
-      cd /opt/node/radapi
-      git pull origin master
+      cd /home/pi/radapi
+      git reset HEAD --hard && git pull origin master
     fi
-    mkdir -p /opt/node/radapi/data/
-    npm install express node-red node-red-node-swagger underscore async
-    npm install -g bower
+    mkdir -p /home/pi/radapi/data
+    npm install \
+      express \
+      node-red \
+      node-red-node-swagger \
+      underscore \
+      async
     bower install
 
   echo "┌─────────┐"
   echo "│ Jupyter │"
   echo "└─────────┘"
     sudo pip install -U requests skidl notebook
-    mkdir -p $HOME/notebooks/
+    mkdir -p $HOME/notebooks
     # enable in iframes
     sudo sed -i "s/\"frame-ancestors 'self'\",//g" $PYTHON2_PACKAGES_DIR/notebook/base/handlers.py
 
   echo "┌───────────────────────┐"
   echo "│ KiCad Library (skidl) │"
   echo "└───────────────────────┘"
-    sudo mkdir -p /opt/pcb/ && sudo chown pi:pi /opt/pcb/
-    if [ ! -d /opt/pcb/kicad-library ]; then
-      git clone --depth 1 https://github.com/KiCad/kicad-library.git /opt/pcb/kicad-library
-      cd /opt/pcb/kicad-library
+    if [ ! -d /home/pi/kicad-library ]; then
+      git clone --depth 1 https://github.com/KiCad/kicad-library.git /home/pi/kicad-library
     else
-      cd /opt/pcb/kicad-library
-      git pull origin master
+      cd /home/pi/kicad-library
+      git reset HEAD --hard && git pull origin master
     fi
 
   echo "┌─────────┐"
   echo "│ PCBmodE │"
   echo "└─────────┘"
-    sudo mkdir -p /opt/pcb/ && sudo chown pi:pi /opt/pcb/
-    if [ ! -d /opt/pcb/pcbmode ]; then
-      git clone --depth 1 https://github.com/boldport/pcbmode.git /opt/pcb/pcbmode
-      cd /opt/pcb/pcbmode
+    if [ ! -d /home/pi/pcbmode ]; then
+      git clone --depth 1 https://github.com/boldport/pcbmode.git /home/pi/pcbmode
+      cd /home/pi/pcbmode
     else
-      cd /opt/pcb/pcbmode
-      git pull origin master
+      cd /home/pi/pcbmode
+      git reset HEAD --hard && git pull origin master
     fi
     sudo python setup.py install
 
   echo "┌──────────────┐"
   echo "│ ice40 Viewer │"
   echo "└──────────────┘"
-    sudo mkdir -p /opt/fpga/ && sudo chown pi:pi /opt/fpga/
-    if [ ! -d /opt/fpga/ice40_viewer ]; then
-      git clone --depth 1 https://github.com/knielsen/ice40_viewer.git /opt/fpga/ice40_viewer
+    if [ ! -d /home/pi/ice40_viewer ]; then
+      git clone --depth 1 https://github.com/knielsen/ice40_viewer.git /home/pi/ice40_viewer
     else
-      cd /opt/fpga/ice40_viewer
-      git pull origin master
+      cd /home/pi/ice40_viewer
+      git reset HEAD --hard && git pull origin master
     fi
 
   echo "┌──────────┐"
   echo "│ icetools │"
   echo "└──────────┘"
-    if [ ! -d /opt/fpga/icetools ]; then
-      git clone --depth 1 https://github.com/ddm/icetools.git /opt/fpga/icetools
-      cd /opt/fpga/icetools
+    if [ ! -d /home/pi/icetools ]; then
+      git clone --depth 1 https://github.com/ddm/icetools.git /home/pi/icetools
+      cd /home/pi/icetools
     else
-      cd /opt/fpga/icetools
-      git pull origin master
+      cd /home/pi/icetools
+      git reset HEAD --hard && git pull origin master
     fi
     ./icetools.sh
 
   echo "┌─────────┐"
   echo "│ OpenOCD │"
   echo "└─────────┘"
-    rm -rf /home/pi/openocd
-    git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
-    cd /home/pi/openocd/
+    if [ ! -d /home/pi/openocd ]; then
+      git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
+      cd /home/pi/openocd
+    else
+      cd /home/pi/openocd
+      git reset HEAD --hard && git pull origin master
+    fi
     ./bootstrap
     ./configure --enable-sysfsgpio --enable-bcm2835gpio
     make
@@ -179,13 +195,14 @@ ssh pi << 'EOF'
 EOF
 
 echo "Configuring..."
-  scp $DIR/radapi/data/*   pi:/opt/node/radapi/data/
-  scp $DIR/radapi/public/* pi:/opt/node/radapi/public/
-  scp $DIR/radapi/index.js pi:/opt/node/radapi/index.js
+  scp $DIR/radapi/data/*   pi:/home/pi/radapi/data/
+  scp $DIR/radapi/public/* pi:/home/pi/radapi/public/
+  scp $DIR/radapi/index.js pi:/home/pi/radapi/index.js
   scp $DIR/radapi/radapi.service pi:
   scp $DIR/notebook/*.ipynb pi:/home/pi/notebooks/
   scp $DIR/notebook/notebook.service pi:
   scp $DIR/butterfly/butterfly.service pi:
+  scp $DIR/c9/c9.service pi:
 ssh pi << 'EOF'
   sudo mv /home/pi/radapi.service /etc/systemd/system/
   sudo mv /home/pi/notebook.service /etc/systemd/system/

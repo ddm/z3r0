@@ -3,7 +3,7 @@ Description=Cloud9
 
 [Service]
 WorkingDirectory=/home/pi/
-ExecStart=/opt/node/latest/bin/node --max_old_space_size=256 /home/pi/.c9/server.js -p 8181 -a :
+ExecStart=/usr/local/bin/node --max_old_space_size=256 /home/pi/.c9/server.js -p 8181 -a :
 Restart=always
 RestartSec=5
 StandardOutput=syslog

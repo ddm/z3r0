@@ -2,7 +2,7 @@
 Description=Jupyter
 
 [Service]
-Environment="KISYSMOD=/opt/pcb/kicad-library/modules"
+Environment="KISYSMOD=/home/pi/kicad-library/modules"
 WorkingDirectory=/home/pi/notebooks/
 ExecStart=/usr/local/bin/jupyter notebook --ip=0.0.0.0 --no-browser --NotebookApp.token=''
 Restart=always

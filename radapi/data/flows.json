@@ -172,7 +172,8 @@
                 "type": "string",
                 "enum": [
                     "butterfly",
-                    "notepad"
+                    "notepad",
+                    "c9"
                 ]
             }
         ],

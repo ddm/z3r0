@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
+set -e
+
 RASPBIAN_DISTRO="raspbian_lite"        # || raspbian
 RASPBIAN_FLAVOR="raspbian-jessie-lite" # || raspbian-jessie
-RASPBIAN_RELEASE="2017-03-03"
-RASPBIAN_VERSION="2017-03-02"
-
-RASPBIAN_URL="http://director.downloads.raspberrypi.org/${RASPBIAN_DISTRO}/images/${RASPBIAN_DISTRO}-${RASPBIAN_RELEASE}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip"
+RASPBIAN_RELEASE="2017-04-10"
+RASPBIAN_VERSION="2017-04-10"
+RASPBIAN_URL="http://vx2-downloads.raspberrypi.org/${RASPBIAN_DISTRO}/images/${RASPBIAN_DISTRO}-${RASPBIAN_RELEASE}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip"
+EXPECTED_SHASUM="c24a4c7dd1a5957f303193fee712d0d2c0c6372d" # SHA1
 
 pushd `dirname $0` > /dev/null
 DIR=`pwd -P`
@@ -25,7 +27,15 @@ if [ ! -f ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img ]; then
     echo "Downloading image..."
     wget ${RASPBIAN_URL}
   fi
-  unzip ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip
+  ACTUAL_SHASUM=$(shasum ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip | cut -d ' ' -f 1)
+  if [[ ${ACTUAL_SHASUM} == ${EXPECTED_SHASUM} ]]; then
+    echo "Matching SHA1: ${ACTUAL_SHASUM}"
+    unzip ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip
+  else
+    echo "SHA1 mismatch: expected ${EXPECTED_SHASUM} but got ${ACTUAL_SHASUM}"
+    rm ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip  
+    exit 1
+  fi
 fi
 RASPBIAN_SIZE=$(stat -x ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img | grep Size | cut -d ':' -f 2 | cut -d ' ' -f 2)
 echo "Image: ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img"

@@ -2,8 +2,8 @@
 Description=RadAPI
 
 [Service]
-WorkingDirectory=/opt/node/radapi/
-ExecStart=/opt/node/latest/bin/node --max_old_space_size=256 /opt/node/radapi/index.js
+WorkingDirectory=/home/pi/radapi/
+ExecStart=/usr/local/bin/node --max_old_space_size=256 /home/pi/radapi/index.js
 Restart=always
 RestartSec=5
 StandardOutput=syslog

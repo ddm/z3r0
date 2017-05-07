@@ -52,7 +52,10 @@ ssh pi << 'EOF'
       python3-dev \
       picocom \
       vim \
-      tmux
+      tmux \
+      gperf \
+      hostapd \
+      dnsmasq
     sudo apt-get autoremove -y --purge
     sudo apt-get -y clean
     wget https://bootstrap.pypa.io/get-pip.py
@@ -60,6 +63,26 @@ ssh pi << 'EOF'
     PYTHON2_VERSION=$(python --version 2>&1 | egrep -o '2\.[0-9]+')
     PYTHON2_PACKAGES_DIR="/usr/local/lib/python$PYTHON2_VERSION/dist-packages"
     rm get-pip.py
+
+  echo "┌──────────┐"
+  echo "│ InfluxDB │"
+  echo "└──────────┘"
+    INFLUXDB_VERSION="1.2.2"
+    INFLUXDB_BUILD="1.2.2-1"
+    if [ ! -f /tmp/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz ]; then
+      wget -O /tmp/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz https://dl.influxdata.com/influxdb/releases/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz
+    fi
+    if [ ! -d /tmp/influxdb-${INFLUXDB_BUILD} ]; then
+      cd /tmp
+      tar xzvf influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz
+    fi
+    sudo mkdir -p /etc/influxdb
+    sudo mkdir -p /etc/logrotate.d/
+    sudo mkdir -p /var/{log,lib}/influxdb/
+    sudo mv /tmp/influxdb-${INFLUXDB_BUILD}/etc/logrotate.d/influxdb /etc/logrotate.d/influxdb
+    sudo mv /tmp/influxdb-${INFLUXDB_BUILD}/usr/bin/{influx,influxd,influx_inspect,influx_stress,influx_tsm} /usr/local/bin/
+    sudo mv /tmp/influxdb-${INFLUXDB_BUILD}/influxdb.conf /etc/influxdb/
+    rm -f /tmp/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz
 
   echo "┌───────────┐"
   echo "│ Butterfly │"
@@ -87,8 +110,7 @@ ssh pi << 'EOF'
     sudo ln -sf /opt/node/bin/node /usr/local/bin/node
     sudo ln -sf /opt/node/bin/npm /usr/local/bin/npm
     rm -rf /tmp/node
-    npm install -g bower
-    sudo ln -sf /opt/node/bin/bower /usr/local/bin/bower
+    cd /home/pi
 
   echo "┌────────┐"
   echo "│ Cloud9 │"
@@ -99,7 +121,7 @@ ssh pi << 'EOF'
       cd /home/pi/.c9
     else
       cd /home/pi/.c9
-      git reset HEAD --hard && git pull origin docker
+      git stash && git co docker && git reset HEAD --hard && git pull origin docker
     fi
     find -path node_modules -prune -type d -print0 | xargs -t -I {} cd {} && npm install
     cd /home/pi/.c9
@@ -115,7 +137,7 @@ ssh pi << 'EOF'
       cd /home/pi/radapi
     else
       cd /home/pi/radapi
-      git reset HEAD --hard && git pull origin master
+      git stash && git co master && git reset HEAD --hard && git pull origin master
     fi
     mkdir -p /home/pi/radapi/data
     npm install \
@@ -124,6 +146,8 @@ ssh pi << 'EOF'
       node-red-node-swagger \
       underscore \
       async
+    npm install -g bower
+    sudo ln -sf /opt/node/bin/bower /usr/local/bin/bower
     bower install
 
   echo "┌─────────┐"
@@ -141,7 +165,7 @@ ssh pi << 'EOF'
       git clone --depth 1 https://github.com/KiCad/kicad-library.git /home/pi/kicad-library
     else
       cd /home/pi/kicad-library
-      git reset HEAD --hard && git pull origin master
+      git stash && git co master && git reset HEAD --hard && git pull origin master
     fi
 
   echo "┌─────────┐"
@@ -152,7 +176,7 @@ ssh pi << 'EOF'
       cd /home/pi/pcbmode
     else
       cd /home/pi/pcbmode
-      git reset HEAD --hard && git pull origin master
+      git stash && git co master && git reset HEAD --hard && git pull origin master
     fi
     sudo python setup.py install
 
@@ -163,7 +187,7 @@ ssh pi << 'EOF'
       git clone --depth 1 https://github.com/knielsen/ice40_viewer.git /home/pi/ice40_viewer
     else
       cd /home/pi/ice40_viewer
-      git reset HEAD --hard && git pull origin master
+      git stash && git co master && git reset HEAD --hard && git pull origin master
     fi
 
   echo "┌──────────┐"
@@ -174,7 +198,7 @@ ssh pi << 'EOF'
       cd /home/pi/icetools
     else
       cd /home/pi/icetools
-      git reset HEAD --hard && git pull origin master
+      git stash && git co master && git reset HEAD --hard && git pull origin master
     fi
     ./icetools.sh
 
@@ -186,7 +210,7 @@ ssh pi << 'EOF'
       cd /home/pi/openocd
     else
       cd /home/pi/openocd
-      git reset HEAD --hard && git pull origin master
+      git stash && git co master && git reset HEAD --hard && git pull origin master
     fi
     ./bootstrap
     ./configure --enable-sysfsgpio --enable-bcm2835gpio
@@ -198,19 +222,24 @@ echo "Configuring..."
   scp $DIR/radapi/data/*   pi:/home/pi/radapi/data/
   scp $DIR/radapi/public/* pi:/home/pi/radapi/public/
   scp $DIR/radapi/index.js pi:/home/pi/radapi/index.js
-  scp $DIR/radapi/radapi.service pi:
   scp $DIR/notebook/*.ipynb pi:/home/pi/notebooks/
-  scp $DIR/notebook/notebook.service pi:
-  scp $DIR/butterfly/butterfly.service pi:
-  scp $DIR/c9/c9.service pi:
+  services=(notebook radapi c9 influxdb butterfly)
+  for service in ${services[@]}; do
+    scp $DIR/${service}/${service}.service pi:
+  done
+  scp $DIR/ssh/sshd_config pi:
+  scp $DIR/hostapd/* pi:
+  scp $DIR/network/* pi:
+  scp $DIR/wpa_supplicant/* pi:
 ssh pi << 'EOF'
-  sudo mv /home/pi/radapi.service /etc/systemd/system/
-  sudo mv /home/pi/notebook.service /etc/systemd/system/
-  sudo mv /home/pi/butterfly.service /etc/systemd/system/
-  sudo mv /home/pi/c9.service /etc/systemd/system/
+  sudo mv /home/pi/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+  sudo mv /home/pi/interfaces /etc/network/interfaces
+  sudo mv /home/pi/hostapd /etc/default/hostapd
+  sudo mv /home/pi/sshd_config /etc/ssh/sshd_config
+  sudo mv /home/pi/{radapi,notebook,c9,butterfly,influxdb}.service /etc/systemd/system/
   sudo systemctl enable radapi.service
   sudo systemctl enable notebook.service
-  sudo systemctl enable butterfly.service
   sudo systemctl enable c9.service
+  sudo systemctl enable influxdb.service
   sudo reboot
 EOF

@@ -1,0 +1,16 @@
+[Unit]
+Description=InfluxDB
+
+[Service]
+WorkingDirectory=/etc/influxdb/
+ExecStart=influxd
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=influxdb
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target

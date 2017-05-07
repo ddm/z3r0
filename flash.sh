@@ -33,7 +33,6 @@ if [ ! -f ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img ]; then
     unzip ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip
   else
     echo "SHA1 mismatch: expected ${EXPECTED_SHASUM} but got ${ACTUAL_SHASUM}"
-    rm ${DIR}/${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.zip  
     exit 1
   fi
 fi
@@ -42,6 +41,7 @@ echo "Image: ${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}.img"
 echo "Size: ${RASPBIAN_SIZE}"
 
 echo "Unmounting SD Card Volume /dev/${TARGET}s1..."
+# TODO Linux support
 sudo diskutil unmount /dev/${TARGET}s1
 
 echo "Flashing SD Card (/dev/r${TARGET})..."

@@ -171,8 +171,7 @@
                 "required": true,
                 "type": "string",
                 "enum": [
-                    "butterfly",
-                    "notepad",
+                    "notebook",
                     "c9"
                 ]
             }

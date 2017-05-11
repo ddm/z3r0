@@ -3,49 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1" name="viewport"/>
     <meta name="viewport" content="width=device-width"/>
-    <title>Preview</title>
-    <style type="text/css">
-        .preview-container {
-            position: relative;
-            float: left;
-            width: 200px;
-            height: 200px;
-            padding: 0;
-            margin: 0.5em;
-        }
-        .preview-overlay {
-            position: absolute;
-            z-index: 1;
-            top: 0;
-            left: 0;
-            width: 200px;
-            height: 200px;
-            padding: 0;
-            margin: 0;
-        }
-        .preview-thumbnail {
-            position: absolute;
-            z-index: 0;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            width: 1000px;
-            height: 1000px;
-            padding: 0;
-            margin: 0;
-            border: none;
-            transform-origin: top left;
-            transform: scale(0.2);
-        }
-    </style>
-    <script src="lib/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <title>z3r0</title>
+    <script src="lib/webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="lib/polymer/polymer.html">
 </head>
 <body>
     <dom-module id="preview-items">
         <template>
+            <style type="text/css">
+		.preview-container {
+		    position: relative;
+		    float: left;
+		    width: 200px;
+		    height: 200px;
+		    padding: 0;
+		    margin: 0.5em;
+		}
+		.preview-overlay {
+		    position: absolute;
+		    z-index: 1;
+		    top: 0;
+		    left: 0;
+		    width: 200px;
+		    height: 200px;
+		    padding: 0;
+		    margin: 0;
+		}
+		.preview-thumbnail {
+		    position: absolute;
+		    z-index: 0;
+		    top: 0;
+		    left: 0;
+		    pointer-events: none;
+		    width: 1000px;
+		    height: 1000px;
+		    padding: 0;
+		    margin: 0;
+		    border: none;
+		    transform-origin: top left;
+		    transform: scale(0.2);
+		}
+	    </style>
             <template
                 is="dom-repeat"
                 items="[[items]]"
@@ -85,6 +85,11 @@
                             description: "c9",
                             url: `//${window.location.hostname}:8181/`,
                             sandbox: "allow-same-origin allow-scripts"
+                        },
+                        {
+                            description: "grafana",
+                            url: `//${window.location.hostname}:3000/`,
+                            sandbox: "allow-same-origin allow-scripts"
                         }
                     ]
                 }
@@ -92,8 +97,10 @@
             ready: () => { console.log("Ready!"); }
         });
     </script>
-    <template is="dom-bind">
-        <preview-items></preview-items>
-    </template>
+    <dom-bind>
+        <template is="dom-bind">
+            <preview-items></preview-items>
+        </template>
+    </dom-bind>
 </body>
 </html>

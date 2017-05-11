@@ -19,18 +19,25 @@ if [ ! -f $HOME/.ssh/pi.pub ]; then
 fi
 PUBLIC_KEY=$(cat $HOME/.ssh/pi.pub)
 
-echo "Waiting..."
-  while ! ping -c1 raspberrypi.local &>/dev/null; do :; done # Wait for network
-  sleep 15 # Wait for ssh
+echo "Waiting for raspberrypi.local..."
+  while ! ping -c1 raspberrypi.local &>/dev/null; do :; done
+  sleep 15
 
 echo "Bootstraping..."
   ssh pi "mkdir -p ~/.ssh && echo $PUBLIC_KEY > .ssh/authorized_keys"
-  scp ./home/* pi:
-  scp ./home/.* pi:
-  ssh pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen"
+  scp $DIR/ssh/sshd_config pi:
+  scp $DIR/home/* pi:
+  scp $DIR/home/.* pi:
+  scp $DIR/apt/sources.list pi:
+  ssh pi "sudo mv ~/sources.list /etc/apt/sources.list && sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen && sudo systemctl restart ssh"
+
+echo "Waiting for ssh..."
+  while ! ping -c1 raspberrypi.local &>/dev/null; do :; done
+  sleep 15
 
 echo "Installing..."
 ssh pi << 'EOF'
+  sudo mv /home/pi/sshd_config /etc/ssh/sshd_config
   echo "Dependencies..."
     sudo apt-get update
     DEBIAN_FRONTEND=noninteractive sudo apt-get -y --force-yes dist-upgrade
@@ -42,6 +49,7 @@ ssh pi << 'EOF'
       automake \
       libtool \
       pkg-config \
+      libfontconfig \
       libusb-1.0-0-dev\
       libftdi-dev \
       libffi-dev \
@@ -62,13 +70,31 @@ ssh pi << 'EOF'
     sudo python get-pip.py
     PYTHON2_VERSION=$(python --version 2>&1 | egrep -o '2\.[0-9]+')
     PYTHON2_PACKAGES_DIR="/usr/local/lib/python$PYTHON2_VERSION/dist-packages"
+    git config --global user.name  guest
+    git config --global user.email guest@0x01.com
     rm get-pip.py
+
+  echo "┌────┐"
+  echo "│ Go │"
+  echo "└────┘"
+    GOLANG_VERSION="1.8.1"
+    GOROOT="/usr/local/go"
+    rm ${HOME}/go${GOLANG_VERSION}.linux-armv6l.tar.gz 2> /dev/null
+    wget https://storage.googleapis.com/golang/go${GOLANG_VERSION}.linux-armv6l.tar.gz ${HOME}/go${GOLANG_VERSION}.linux-armv6l.tar.gz
+    tar xzvf go${GOLANG_VERSION}.linux-armv6l.tar.gz
+    sudo rm -rf /usr/local/go
+    sudo mv ${HOME}/go /usr/local/go
+    sudo ln -sf /opt/go/bin* /usr/local/bin/
+    mkdir -p ${HOME}/go/src
+
 
   echo "┌──────────┐"
   echo "│ InfluxDB │"
   echo "└──────────┘"
     INFLUXDB_VERSION="1.2.2"
     INFLUXDB_BUILD="1.2.2-1"
+    rm -f /tmp/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz
+    rm -rf /tmp/influxdb-${INFLUXDB_BUILD}
     if [ ! -f /tmp/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz ]; then
       wget -O /tmp/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz https://dl.influxdata.com/influxdb/releases/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz
     fi
@@ -82,17 +108,8 @@ ssh pi << 'EOF'
     sudo mv /tmp/influxdb-${INFLUXDB_BUILD}/etc/logrotate.d/influxdb /etc/logrotate.d/influxdb
     sudo mv /tmp/influxdb-${INFLUXDB_BUILD}/usr/bin/{influx,influxd,influx_inspect,influx_stress,influx_tsm} /usr/local/bin/
     sudo mv /tmp/influxdb-${INFLUXDB_BUILD}/influxdb.conf /etc/influxdb/
-    rm -f /tmp/influxdb-${INFLUXDB_VERSION}_linux_armhf.tar.gz
-
-  echo "┌───────────┐"
-  echo "│ Butterfly │"
-  echo "└───────────┘"
-    sudo pip install -U butterfly==2.0.2
-    # suppress warnings on close
-    EVENT_REPLACE="s/beforeunload\"/beforeunload_disabled\"/g"
-    JS_ASSEST_DIR="$PYTHON2_PACKAGES_DIR/butterfly/static"
-    sudo sed -i "$EVENT_REPLACE" $JS_ASSEST_DIR/ext.min.js
-    sudo sed -i "$EVENT_REPLACE" $JS_ASSEST_DIR/main.min.js
+    sudo mkdir -p /var/lib/influxdb/{data,meta}
+    sudo chown pi:pi /var/lib/influxdb/{data,meta}
 
   echo "┌─────────┐"
   echo "│ Node.js │"
@@ -107,8 +124,7 @@ ssh pi << 'EOF'
     tar xvf $NODE_PACKAGE.tar.xz
     sudo rm -rf /opt/node
     sudo mv /tmp/node/$NODE_PACKAGE /opt/node
-    sudo ln -sf /opt/node/bin/node /usr/local/bin/node
-    sudo ln -sf /opt/node/bin/npm /usr/local/bin/npm
+    sudo ln -sf /opt/node/bin/* /usr/local/bin/
     rm -rf /tmp/node
     cd /home/pi
 
@@ -120,8 +136,7 @@ ssh pi << 'EOF'
       git clone --depth 1 --branch docker https://github.com/ddm/core.git /home/pi/.c9
       cd /home/pi/.c9
     else
-      cd /home/pi/.c9
-      git stash && git co docker && git reset HEAD --hard && git pull origin docker
+      cd /home/pi/.c9 && git stash && git checkout docker && git reset HEAD --hard && git pull origin docker
     fi
     find -path node_modules -prune -type d -print0 | xargs -t -I {} cd {} && npm install
     cd /home/pi/.c9
@@ -136,8 +151,7 @@ ssh pi << 'EOF'
       git clone --depth 1 https://github.com/ddm/radapi /home/pi/radapi
       cd /home/pi/radapi
     else
-      cd /home/pi/radapi
-      git stash && git co master && git reset HEAD --hard && git pull origin master
+      cd /home/pi/radapi && git stash && git checkout master && git reset HEAD --hard && git pull origin master
     fi
     mkdir -p /home/pi/radapi/data
     npm install \
@@ -164,8 +178,7 @@ ssh pi << 'EOF'
     if [ ! -d /home/pi/kicad-library ]; then
       git clone --depth 1 https://github.com/KiCad/kicad-library.git /home/pi/kicad-library
     else
-      cd /home/pi/kicad-library
-      git stash && git co master && git reset HEAD --hard && git pull origin master
+      cd /home/pi/kicad-library && git stash && git checkout master && git reset HEAD --hard && git pull origin master
     fi
 
   echo "┌─────────┐"
@@ -175,8 +188,7 @@ ssh pi << 'EOF'
       git clone --depth 1 https://github.com/boldport/pcbmode.git /home/pi/pcbmode
       cd /home/pi/pcbmode
     else
-      cd /home/pi/pcbmode
-      git stash && git co master && git reset HEAD --hard && git pull origin master
+      cd /home/pi/pcbmode && git stash && git checkout master && git reset HEAD --hard && git pull origin master
     fi
     sudo python setup.py install
 
@@ -186,8 +198,7 @@ ssh pi << 'EOF'
     if [ ! -d /home/pi/ice40_viewer ]; then
       git clone --depth 1 https://github.com/knielsen/ice40_viewer.git /home/pi/ice40_viewer
     else
-      cd /home/pi/ice40_viewer
-      git stash && git co master && git reset HEAD --hard && git pull origin master
+      cd /home/pi/ice40_viewer && git stash && git checkout master && git reset HEAD --hard && git pull origin master
     fi
 
   echo "┌──────────┐"
@@ -197,8 +208,7 @@ ssh pi << 'EOF'
       git clone --depth 1 https://github.com/ddm/icetools.git /home/pi/icetools
       cd /home/pi/icetools
     else
-      cd /home/pi/icetools
-      git stash && git co master && git reset HEAD --hard && git pull origin master
+      cd /home/pi/icetools && git stash && git checkout master && git reset HEAD --hard && git pull origin master
     fi
     ./icetools.sh
 
@@ -209,9 +219,9 @@ ssh pi << 'EOF'
       git clone --depth 1 git://git.code.sf.net/p/openocd/code /home/pi/openocd
       cd /home/pi/openocd
     else
-      cd /home/pi/openocd
-      git stash && git co master && git reset HEAD --hard && git pull origin master
+      cd /home/pi/openocd && git stash && git checkout master && git reset HEAD --hard && git pull origin master
     fi
+    make clean 
     ./bootstrap
     ./configure --enable-sysfsgpio --enable-bcm2835gpio
     make
@@ -219,27 +229,24 @@ ssh pi << 'EOF'
 EOF
 
 echo "Configuring..."
-  scp $DIR/radapi/data/*   pi:/home/pi/radapi/data/
-  scp $DIR/radapi/public/* pi:/home/pi/radapi/public/
-  scp $DIR/radapi/index.js pi:/home/pi/radapi/index.js
-  scp $DIR/notebook/*.ipynb pi:/home/pi/notebooks/
-  services=(notebook radapi c9 influxdb butterfly)
-  for service in ${services[@]}; do
-    scp $DIR/${service}/${service}.service pi:
-  done
-  scp $DIR/ssh/sshd_config pi:
   scp $DIR/hostapd/* pi:
   scp $DIR/network/* pi:
   scp $DIR/wpa_supplicant/* pi:
+  scp $DIR/radapi/data/*    pi:/home/pi/radapi/data/
+  scp $DIR/radapi/public/*  pi:/home/pi/radapi/public/
+  scp $DIR/radapi/index.js  pi:/home/pi/radapi/index.js
+  scp $DIR/notebook/*.ipynb pi:/home/pi/notebooks/
+
+  services=(notebook radapi c9 influxdb)
+  for service in ${services[@]}; do
+    scp $DIR/${service}/${service}.service pi:
+  done
+
 ssh pi << 'EOF'
   sudo mv /home/pi/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
   sudo mv /home/pi/interfaces /etc/network/interfaces
   sudo mv /home/pi/hostapd /etc/default/hostapd
-  sudo mv /home/pi/sshd_config /etc/ssh/sshd_config
-  sudo mv /home/pi/{radapi,notebook,c9,butterfly,influxdb}.service /etc/systemd/system/
-  sudo systemctl enable radapi.service
-  sudo systemctl enable notebook.service
-  sudo systemctl enable c9.service
-  sudo systemctl enable influxdb.service
+  sudo mv /home/pi/{radapi,notebook,c9,influxdb}.service /etc/systemd/system/
+  sudo systemctl enable {radapi,notebook,c9,influxdb}.service
   sudo reboot
 EOF

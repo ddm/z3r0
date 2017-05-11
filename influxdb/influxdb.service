@@ -3,7 +3,7 @@ Description=InfluxDB
 
 [Service]
 WorkingDirectory=/etc/influxdb/
-ExecStart=influxd
+ExecStart=/usr/local/bin/influxd
 Restart=always
 RestartSec=5
 StandardOutput=syslog

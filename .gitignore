@@ -2,4 +2,5 @@
 *.zip
 *.gz
 *.tgz
+*.p12
 wpa_supplicant

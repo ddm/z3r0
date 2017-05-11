@@ -1,13 +1,15 @@
 [Unit]
-Description=Butterfly
+Description=Telegraf
+Requires=influxdb.service
 
 [Service]
-ExecStart=/usr/local/bin/butterfly.server.py --host=raspberrypi.local --unsecure
+WorkingDirectory=/home/pi/
+ExecStart=/usr/local/bin/telegraf
 Restart=always
 RestartSec=5
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=butterfly
+SyslogIdentifier=telegraf
 User=pi
 Group=pi
 

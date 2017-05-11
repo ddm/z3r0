@@ -1,0 +1,17 @@
+[Unit]
+Description=Grafana
+Requires=influxdb.service
+
+[Service]
+WorkingDirectory=/home/pi/grafana/
+ExecStart=/usr/local/bin/grafana-server
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=grafana
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target

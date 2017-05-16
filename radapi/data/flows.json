@@ -15,6 +15,11 @@
         "label": "SWD"
     },
     {
+        "id": "1602a0ad.66807f",
+        "type": "tab",
+        "label": "Cirlces"
+    },
+    {
         "id": "b6cd8abc.bda2e8",
         "type": "subflow",
         "name": "SWD",
@@ -68,7 +73,7 @@
         "id": "b333b199.a9108",
         "type": "swagger-doc",
         "z": "",
-        "summary": "Shutdown",
+        "summary": "",
         "description": "",
         "tags": "z3r0",
         "consumes": "",
@@ -85,7 +90,7 @@
         "id": "deec8ee8.3329c",
         "type": "swagger-doc",
         "z": "",
-        "summary": "Reboot",
+        "summary": "",
         "description": "",
         "tags": "z3r0",
         "consumes": "",
@@ -102,11 +107,11 @@
         "id": "6cedbd68.79cc24",
         "type": "swagger-doc",
         "z": "",
-        "summary": "Upgrade running software",
+        "summary": "",
         "description": "",
         "tags": "z3r0",
         "consumes": "",
-        "produces": "text/plain",
+        "produces": "",
         "parameters": [],
         "responses": {
             "200": {
@@ -158,11 +163,11 @@
         "id": "c2edd4bd.406af8",
         "type": "swagger-doc",
         "z": "",
-        "summary": "Update a z3r0 service",
+        "summary": "",
         "description": "",
         "tags": "z3r0",
         "consumes": "",
-        "produces": "text/plain",
+        "produces": "",
         "parameters": [
             {
                 "name": "service",
@@ -175,16 +180,17 @@
                     "influxdb",
                     "notebook",
                     "radapi",
-                    "ssh",
                     "telegraf"
                 ]
             },
             {
-                "name": "operation",
+                "name": "action",
                 "in": "path",
                 "required": true,
                 "type": "string",
                 "enum": [
+                    "disable",
+                    "enable",
                     "start",
                     "stop",
                     "restart"
@@ -202,18 +208,18 @@
         "id": "445ea181.1f2a6",
         "type": "swagger-doc",
         "z": "",
-        "summary": "Service status report",
+        "summary": "",
         "description": "",
         "tags": "z3r0",
         "consumes": "",
-        "produces": "text/plain",
+        "produces": "",
         "parameters": [
             {
                 "name": "service",
                 "in": "path",
                 "required": true,
                 "type": "string",
-                 "enum": [
+                "enum": [
                     "c9",
                     "grafana",
                     "influxdb",
@@ -224,6 +230,23 @@
                 ]
             }
         ],
+        "responses": {
+            "200": {
+                "description": "OK"
+            }
+        },
+        "deprecated": false
+    },
+    {
+        "id": "8e6f16ff.740788",
+        "type": "swagger-doc",
+        "z": "",
+        "summary": "",
+        "description": "",
+        "tags": "",
+        "consumes": "",
+        "produces": "application/json",
+        "parameters": [],
         "responses": {
             "200": {
                 "description": "OK"
@@ -437,10 +460,10 @@
         "type": "http in",
         "z": "2aca2241.addfbe",
         "name": "",
-        "url": "/upgrade",
+        "url": "/apt/upgrade",
         "method": "post",
         "swaggerDoc": "6cedbd68.79cc24",
-        "x": 129.5,
+        "x": 139.5,
         "y": 157,
         "wires": [
             [
@@ -730,11 +753,11 @@
         "type": "http in",
         "z": "2aca2241.addfbe",
         "name": "",
-        "url": "/:operation/:service",
+        "url": "/systemctl/:action/:service",
         "method": "post",
         "swaggerDoc": "c2edd4bd.406af8",
-        "x": 161,
-        "y": 226.20000648498535,
+        "x": 198,
+        "y": 219.20001220703125,
         "wires": [
             [
                 "ed92d208.8d6cf"
@@ -771,7 +794,7 @@
         "type": "function",
         "z": "2aca2241.addfbe",
         "name": "",
-        "func": "let operation = msg.req.params.operation;\nlet service = msg.req.params.service;\n\nmsg.payload = `${operation} ${service}`\n\nreturn msg;",
+        "func": "let action = msg.req.params.action;\nlet service = msg.req.params.service;\n\nlet _ = context.global._;\n\nif (_.contains([\n       \"c9\",\n       \"grafana\",\n       \"influxdb\",\n       \"notebook\",\n       \"radapi\",\n       \"telegraf\"\n   ], service) && _.contains([\n       \"disable\",\n       \"enable\",\n       \"start\",\n       \"stop\",\n       \"restart\"\n   ], action)) {\n    msg.payload = `${action} ${service}`\n    return msg;\n}\n",
         "outputs": 1,
         "noerr": 0,
         "x": 170.5,
@@ -787,10 +810,10 @@
         "type": "http in",
         "z": "2aca2241.addfbe",
         "name": "",
-        "url": "/status/:service",
+        "url": "/systemctl/status/:service",
         "method": "get",
         "swaggerDoc": "445ea181.1f2a6",
-        "x": 146.5,
+        "x": 176.5,
         "y": 597,
         "wires": [
             [
@@ -803,7 +826,7 @@
         "type": "function",
         "z": "2aca2241.addfbe",
         "name": "",
-        "func": "let service = msg.req.params.service;\n\nmsg.payload = `status ${service}`\n\nreturn msg;;",
+        "func": "let service = msg.req.params.service;\n\nlet _ = context.global._;\n\nif (_.contains([\n       \"c9\",\n       \"grafana\",\n       \"influxdb\",\n       \"notebook\",\n       \"radapi\",\n       \"ssh\",\n       \"telegraf\"\n   ], service)) {\n    msg.payload = `status ${service}`\n    return msg;\n}\n",
         "outputs": 1,
         "noerr": 0,
         "x": 120.5,
@@ -811,6 +834,47 @@
         "wires": [
             [
                 "4de153f9.f7c2fc"
+            ]
+        ]
+    },
+    {
+        "id": "71db7295.2729ac",
+        "type": "http in",
+        "z": "1602a0ad.66807f",
+        "name": "",
+        "url": "/circles",
+        "method": "get",
+        "swaggerDoc": "8e6f16ff.740788",
+        "x": 143.5,
+        "y": 68,
+        "wires": [
+            [
+                "d73ef67f.849578"
+            ]
+        ]
+    },
+    {
+        "id": "1722b50.768014b",
+        "type": "http response",
+        "z": "1602a0ad.66807f",
+        "name": "",
+        "x": 401.5,
+        "y": 86,
+        "wires": []
+    },
+    {
+        "id": "d73ef67f.849578",
+        "type": "function",
+        "z": "1602a0ad.66807f",
+        "name": "",
+        "func": "msg.payload = [\n    { x: 10, y: 100, r: 10, value: \"#f00\" },\n    { x: 60, y: 60, r: 20, value: \"#00f\" },\n    { x: 90, y: 90, r: 30, value: \"#0f0\" }\n];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 281.5,
+        "y": 158,
+        "wires": [
+            [
+                "1722b50.768014b"
             ]
         ]
     }

@@ -43,6 +43,7 @@ ssh pi << 'EOF'
     DEBIAN_FRONTEND=noninteractive sudo apt-get -y --force-yes dist-upgrade
     DEBIAN_FRONTEND=noninteractive sudo apt-get -y --force-yes install \
       ca-certificates \
+      raspberrypi-kernel-headers \
       git \
       build-essential \
       autoconf \
@@ -61,6 +62,9 @@ ssh pi << 'EOF'
       picocom \
       vim \
       tmux \
+      htop \
+      iotop \
+      systemtap \
       gperf \
       hostapd \
       dnsmasq

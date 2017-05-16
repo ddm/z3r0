@@ -13,46 +13,52 @@
     <dom-module id="preview-items">
         <template>
             <style type="text/css">
-		.preview-container {
-		    position: relative;
-		    float: left;
-		    width: 200px;
-		    height: 200px;
-		    padding: 0;
-		    margin: 0.5em;
-		}
-		.preview-overlay {
-		    position: absolute;
-		    z-index: 1;
-		    top: 0;
-		    left: 0;
-		    width: 200px;
-		    height: 200px;
-		    padding: 0;
-		    margin: 0;
-		}
-		.preview-thumbnail {
-		    position: absolute;
-		    z-index: 0;
-		    top: 0;
-		    left: 0;
-		    pointer-events: none;
-		    width: 1000px;
-		    height: 1000px;
-		    padding: 0;
-		    margin: 0;
-		    border: none;
-		    transform-origin: top left;
-		    transform: scale(0.2);
-		}
-	    </style>
+                .preview-container {
+                    position: relative;
+                    float: left;
+                    width: 150px;
+                    height: 150px;
+                    padding: 0;
+                    margin: 0.15em;
+                }
+                .preview-overlay {
+                    position: absolute;
+                    z-index: 1;
+                    top: 0;
+                    left: 0;
+                    width: 150px;
+                    height: 150px;
+                    padding: 0;
+                    margin: 0;
+                }
+                .preview-thumbnail {
+                    position: absolute;
+                    z-index: 0;
+                    top: 0;
+                    left: 0;
+                    pointer-events: none;
+                    width: 1000px;
+                    height: 1000px;
+                    padding: 0;
+                    margin: 0;
+                    border: none;
+                    transform-origin: top left;
+                    transform: scale(0.15);
+                }
+                </style>
             <template
                 is="dom-repeat"
                 items="[[items]]"
                 as="item">
                 <div class="preview-container">
                     <a class="preview-overlay" href="[[item.url]]"></a>
-                    <iframe class="preview-thumbnail" width="200" height="200" src="[[item.url]]" scrolling="no" sandbox="[[item.sandbox]]"></iframe>
+                    <iframe
+                        class="preview-thumbnail"
+                        width="150"
+                        height="150"
+                        scrolling="no" 
+                        src="[[item.url]]"
+                        sandbox="[[item.sandbox]]"></iframe>
                 </div>
             </template>
         </template>
@@ -72,23 +78,23 @@
                             sandbox: "allow-same-origin allow-scripts"
                         },
                         {
-                            description: "Node-RED",
-                            url: `//${window.location.hostname}:1880/edit`,
-                            sandbox: "allow-same-origin allow-scripts"
-                        },
-                        {
-                            description: "Jupyter",
+                            description: "Jupyter Notebooks",
                             url: `//${window.location.hostname}:8888/`,
                             sandbox: "allow-same-origin allow-scripts"
                         },
                         {
-                            description: "c9",
+                            description: "Cloud9 IDE",
                             url: `//${window.location.hostname}:8181/`,
                             sandbox: "allow-same-origin allow-scripts"
                         },
                         {
-                            description: "grafana",
+                            description: "Grafana",
                             url: `//${window.location.hostname}:3000/`,
+                            sandbox: "allow-same-origin allow-scripts"
+                        },
+                        {
+                            description: "Node-RED",
+                            url: `//${window.location.hostname}:1880/edit`,
                             sandbox: "allow-same-origin allow-scripts"
                         }
                     ]

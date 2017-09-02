@@ -1,6 +1,7 @@
-*.img
-*.zip
 *.gz
-*.tgz
+*.img
 *.p12
+*.tgz
+*.xz
+*.zip
 wpa_supplicant

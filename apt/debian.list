@@ -1,0 +1,3 @@
+deb [arch=armhf] https://deb.debian.org/debian stretch main
+deb [arch=armhf] https://deb.debian.org/debian stretch-updates main
+deb [arch=armhf] http://security.debian.org/ stretch/updates main contrib non-free

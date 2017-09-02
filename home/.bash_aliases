@@ -6,6 +6,5 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
-alias ll='ls -al'
+alias ll='ls -alh'
 
-alias killopenocd='sudo kill -9 `ps -ef | grep openocd | grep sudo | grep -v grep | awk '"'"'{ print $2 }'"'"'`'

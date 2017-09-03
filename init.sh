@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+: ${1?git-user?}
+: ${2?git-email?}
+
 pushd `dirname $0` > /dev/null
 DIR=`pwd -P`
 popd > /dev/null
@@ -21,16 +24,13 @@ PUBLIC_KEY=$(cat $HOME/.ssh/pi.pub)
 
 echo "Waiting for raspberrypi.local..."
   while ! ping -c1 raspberrypi.local &>/dev/null; do :; done
-  sleep 15
+  sleep 5
 
 echo "Bootstraping..."
+  sleep 5
   ssh pi "mkdir -p ~/.ssh && echo $PUBLIC_KEY > .ssh/authorized_keys"
-  scp $DIR/home/* pi:
-  scp $DIR/home/.* pi:
-  scp $DIR/apt/sources.list pi:
-  ssh pi "sudo mv ~/*.list /etc/apt/sources.list.d/"
+  scp $DIR/home/{.bash_aliases,.bashrc,locale,locale.gen}* pi:
   ssh pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen"
-  ssh pi "sudo apt-get update"
   scp $DIR/ssh/sshd_config pi:
   ssh pi "sudo mv /home/pi/sshd_config /etc/ssh/sshd_config"
   ssh pi "sudo systemctl restart ssh"
@@ -42,9 +42,9 @@ echo "Waiting for ssh..."
 echo "Installing..."
 ssh pi << 'EOF'
   echo "Dependencies..."
-    sudo apt update
-    sudo apt -y --force-yes full-upgrade
-    sudo apt -y --force-yes install \
+    sudo apt-get update
+    sudo apt-get -y dist-upgrade
+    sudo apt-get -y install \
       ca-certificates \
       git \
       vim \
@@ -54,13 +54,12 @@ ssh pi << 'EOF'
     sudo apt-get -y clean
     wget https://bootstrap.pypa.io/get-pip.py
     sudo python get-pip.py
-    PYTHON2_VERSION=$(python --version 2>&1 | egrep -o '2\.[0-9]+')
-    PYTHON2_PACKAGES_DIR="/usr/local/lib/python$PYTHON2_VERSION/dist-packages"
-    git config --global user.name  ddm
-    git config --global user.email ddm@0x01.be
+    git config --global user.name  ${git-user}
+    git config --global user.email ${git-email}
     rm get-pip.py
     curl -fsSL get.docker.com -o get-docker.sh
     sudo sh get-docker.sh
     sudo usermod -aG docker pi
     rm get-docker.sh
 EOF
+ssh pi "sudo pip install docker-compose"

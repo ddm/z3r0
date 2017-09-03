@@ -29,11 +29,10 @@ echo "Waiting for raspberrypi.local..."
 echo "Bootstraping..."
   sleep 5
   ssh pi "mkdir -p ~/.ssh && echo $PUBLIC_KEY > .ssh/authorized_keys"
-  scp $DIR/home/{.bash_aliases,.bashrc,locale,locale.gen}* pi:
-  ssh pi "sudo mv ~/locale.gen /etc/locale.gen && sudo mv ~/locale /etc/default/locale && sudo locale-gen"
-  scp $DIR/ssh/sshd_config pi:
-  ssh pi "sudo mv /home/pi/sshd_config /etc/ssh/sshd_config"
-  ssh pi "sudo systemctl restart ssh"
+  scp $DIR/home/{.bash_aliases,.bashrc} pi:
+  scp $DIR/etc/locale.gen pi: && ssh pi "sudo mv /home/pi/locale.gen /etc/locale.gen"
+  scp $DIR/etc/default/locale pi: && ssh pi "sudo mv /home/pi/locale /etc/default/locale && sudo locale-gen"
+  scp $DIR/etc/ssh/sshd_config pi: && ssh pi "sudo mv /home/pi/sshd_config /etc/ssh/sshd_config" && ssh pi "sudo systemctl restart ssh"
 
 echo "Waiting for ssh..."
   while ! ping -c1 raspberrypi.local &>/dev/null; do :; done

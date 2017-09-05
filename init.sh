@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-: ${1?git-user?}
-: ${2?git-email?}
-
 pushd `dirname $0` > /dev/null
 DIR=`pwd -P`
 popd > /dev/null
@@ -53,8 +50,6 @@ ssh pi << 'EOF'
     sudo apt-get -y clean
     wget https://bootstrap.pypa.io/get-pip.py
     sudo python get-pip.py
-    git config --global user.name  ${git-user}
-    git config --global user.email ${git-email}
     rm get-pip.py
     curl -fsSL get.docker.com -o get-docker.sh
     sudo sh get-docker.sh

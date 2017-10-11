@@ -2,13 +2,14 @@
 
 set -e
 
-RASPBIAN_DISTRO="raspbian_lite"
-RASPBIAN_FLAVOR="raspbian-stretch-lite"
-RASPBIAN_RELEASE="2017-08-17"
-RASPBIAN_VERSION="2017-08-16"
+RASPBIAN_DISTRO="raspbian"
+RASPBIAN_FLAVOR="raspbian-stretch"
+RASPBIAN_RELEASE="2017-09-08"
+RASPBIAN_VERSION="2017-09-07"
 RASPBIAN_IMG="${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}"
 RASPBIAN_URL="http://vx2-downloads.raspberrypi.org/${RASPBIAN_DISTRO}/images/${RASPBIAN_DISTRO}-${RASPBIAN_RELEASE}/${RASPBIAN_IMG}.zip"
-EXPECTED_SHASUM="e38adcc620c8f4118388d09a51d5cd8e9699bc44" # SHA1
+EXPECTED_SHASUM="c35688583510fc93c5deac637976b7a5c9c55689" # SHA1
+PARTUUID="020c3677-02"
 
 pushd `dirname $0` > /dev/null
 DIR=`pwd -P`
@@ -56,6 +57,8 @@ sudo sh -c "${COMMAND}"
 echo "Configuring ssh..."
 sleep 5
 touch /Volumes/boot/ssh
+echo "dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=$PARTUUID rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait modules-load=dwc2,g_ether quiet init=/usr/lib/raspi-config/init_resize.sh splash plymouth.ignore-serial-consoles" > /Volume/boot/cmdline.txt
+cp boot/config.txt /Volume/boot/config.txt
 
 echo "Ejecting SD Card..."
 sleep 5

@@ -21,7 +21,7 @@ PUBLIC_KEY=$(cat $HOME/.ssh/pi.pub)
 
 echo "Waiting for raspberrypi.local..."
   while ! ping -c1 raspberrypi.local &>/dev/null; do :; done
-  sleep 5
+  sleep 2
 
 echo "Bootstraping..."
   sleep 5
@@ -33,7 +33,7 @@ echo "Bootstraping..."
 
 echo "Waiting for ssh..."
   while ! ping -c1 raspberrypi.local &>/dev/null; do :; done
-  sleep 15
+  sleep 2
 
 echo "Installing..."
 ssh pi << 'EOF'

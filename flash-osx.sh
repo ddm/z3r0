@@ -2,14 +2,14 @@
 
 set -e
 
-RASPBIAN_DISTRO="raspbian"
-RASPBIAN_FLAVOR="raspbian-stretch"
-RASPBIAN_RELEASE="2017-09-08"
-RASPBIAN_VERSION="2017-09-07"
+RASPBIAN_DISTRO="raspbian_lite"
+RASPBIAN_FLAVOR="raspbian-buster-lite"
+RASPBIAN_RELEASE="2019-07-12"
+RASPBIAN_VERSION="2019-07-10"
 RASPBIAN_IMG="${RASPBIAN_VERSION}-${RASPBIAN_FLAVOR}"
 RASPBIAN_URL="http://vx2-downloads.raspberrypi.org/${RASPBIAN_DISTRO}/images/${RASPBIAN_DISTRO}-${RASPBIAN_RELEASE}/${RASPBIAN_IMG}.zip"
-EXPECTED_SHASUM="c35688583510fc93c5deac637976b7a5c9c55689" # SHA1
-PARTUUID="020c3677-02"
+EXPECTED_SHASUM="9e5cf24ce483bb96e7736ea75ca422e3560e7b455eee63dd28f66fa1825db70e"
+PARTUUID="17869b7d-02"
 
 pushd `dirname $0` > /dev/null
 DIR=`pwd -P`
@@ -29,9 +29,9 @@ if [ ! -f ${DIR}/${RASPBIAN_IMG}.img ]; then
     echo "Downloading image..."
     wget ${RASPBIAN_URL}
   fi
-  ACTUAL_SHASUM=$(shasum ${DIR}/${RASPBIAN_IMG}.zip | cut -d ' ' -f 1)
+  ACTUAL_SHASUM=$(shasum -a 256 ${DIR}/${RASPBIAN_IMG}.zip | cut -d ' ' -f 1)
   if [[ ${ACTUAL_SHASUM} == ${EXPECTED_SHASUM} ]]; then
-    echo "Matching SHA1: ${ACTUAL_SHASUM}"
+    echo "Matching SHA256: ${ACTUAL_SHASUM}"
     unzip ${RASPBIAN_IMG}.zip
   else
     echo "SHA1 mismatch: expected ${EXPECTED_SHASUM} but got ${ACTUAL_SHASUM}"
@@ -57,8 +57,8 @@ sudo sh -c "${COMMAND}"
 echo "Configuring ssh..."
 sleep 5
 touch /Volumes/boot/ssh
-echo "dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=$PARTUUID rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait modules-load=dwc2,g_ether quiet init=/usr/lib/raspi-config/init_resize.sh splash plymouth.ignore-serial-consoles" > /Volume/boot/cmdline.txt
-cp boot/config.txt /Volume/boot/config.txt
+echo "dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=$PARTUUID rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait modules-load=dwc2,g_ether quiet init=/usr/lib/raspi-config/init_resize.sh" > /Volumes/boot/cmdline.txt
+cp boot/config.txt /Volumes/boot/config.txt
 
 echo "Ejecting SD Card..."
 sleep 5
